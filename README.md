@@ -26,6 +26,8 @@
 
 The friendly Operating System for IoT!
 
+We are forking for Cortex-M0 plattform.
+
 ## FEATURES
 RIOT OS is an operating system for Internet of Things (IoT) devices. It is based on a microkernel and designed for
 * energy efficiency
