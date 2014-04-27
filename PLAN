@@ -18,6 +18,8 @@ List of task for the software project as part of the university course [3]:
 - Porting RIOT on Cortex M0 (estimate 4 weeks)
 - - recompile/ adjust RIOT modules for M0 
 - - Build cycle: add features, compile binaries, flash to board, check for errors
+- - Beeing able to use the Onboard LEDs
+- - Using the UART for Debugging
 - Add support for nRF BLE (4 weeks)
 - - Call and read nRF registers from ported Cortex M0 RIOT-modules
 - - Bluetooth-communication between two nRF BLE 
