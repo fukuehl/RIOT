@@ -1,0 +1,15 @@
+Kleine Testfile zu Kommunikationszwecken
+
+
+- - Einfuerhrung und einarbeitung
+- - - Toolchain verstehen und installieren
+- - -
+- - Portierung von M0
+- - - RIOT fuer unseren ARM kompilieren und schauen was fuer Fehler auftreten
+- - - Binaries auf das Board schieben und schauen, wie es lÃ¤uft
+- - - LEDs ansteuern können
+- - - UART nutzen können
+- - Einbindung von NRF BLE
+- - - Ansprechen und auslesen der NRF Register von M0 seite
+- - - Bluetooth-Kommunikation
+- - Dokumentation der Ergebnisse
