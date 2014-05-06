@@ -1,0 +1,25 @@
+NRF51822 Plugin for eclipse, GCC instructions
+
+http://rumblingsofearthlord.com/blog/2014/03/using-eclipse-gcc-as-work-environment-for-nrf51822/
+http://rumblingsofearthlord.wordpress.com/2014/02/03/setting-up-makefile-development-environment-for-nrf51822-in-linux/
+* https://github.com/finnurtorfa/nrf51 *
+* https://launchpad.net/gcc-arm-embedded *
+http://sourceforge.net/p/nrf51osx/wiki/installation/
+https://github.com/hlnd/nrf51-pure-gcc-setup
+
+j-Link:
+
+http://www.segger.com/jlink-software.html?step=5&file=JLinkLinuxTGZ64_484e
+
+HAUKEs RIOT fork for stm32f0 on:
+
+https://github.com/haukepetersen/RIOT/tree/board_stm32f0discovery/
+https://github.com/RIOT-OS/RIOT/wiki/Board:-STM32F0discovery
+
+debug and flashinh hints:
+
+https://github.com/RIOT-OS/RIOT/wiki/Board:-XMC2Go
+
+Our github for;
+
+https://github.com/taaz/riot
