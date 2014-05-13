@@ -1,5 +1,9 @@
 NRF51822 Plugin for eclipse, GCC instructions
 
+# gcc-arm-eabi for ubuntu:
+
+https://launchpad.net/~terry.guo/+archive/gcc-arm-embedded
+
 http://rumblingsofearthlord.com/blog/2014/03/using-eclipse-gcc-as-work-environment-for-nrf51822/
 http://rumblingsofearthlord.wordpress.com/2014/02/03/setting-up-makefile-development-environment-for-nrf51822-in-linux/
 * https://github.com/finnurtorfa/nrf51 *
