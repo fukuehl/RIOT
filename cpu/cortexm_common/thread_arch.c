@@ -143,15 +143,15 @@ void enter_thread_mode(void)
     __set_CONTROL(mode.w);
 
     /* load pdc->stackpointer in r0 */
-    asm("ldr    r0, =sched_active_thread" );      /* r0 = &sched_active_thread */
-    asm("ldr    r0, [r0]"           );      /* r0 = *r0 = sched_active_thread */
-    asm("ldr    sp, [r0]"           );      /* sp = r0  restore stack pointer*/
-    asm("pop    {r4}"               );      /* skip exception return */
-    asm("pop    {r4-r11}"           );
-    asm("pop    {r0-r3,r12,lr}"     );      /* get registers from stack */
-    asm("pop    {r4}"               );      /* get PC */
-    asm("pop    {r5}"               );      /* discard the xPSR entry */
-    asm("mov    pc, r4"             );      /* load PC */
+    // asm("ldr    r0, =sched_active_thread" );      /* r0 = &sched_active_thread */
+    // asm("ldr    r0, [r0]"           );      /* r0 = *r0 = sched_active_thread */
+    // asm("ldr    sp, [r0]"           );      /* sp = r0  restore stack pointer*/
+    // asm("pop    {r4}"               );       skip exception return
+    // asm("pop    {r4-r11}"           );
+    // asm("pop    {r0-r3,r12,lr}"     );      /* get registers from stack */
+    // asm("pop    {r4}"               );      /* get PC */
+    // asm("pop    {r5}"               );      /* discard the xPSR entry */
+    // asm("mov    pc, r4"             );      /* load PC */
 }
 
 void thread_arch_yield(void)
@@ -185,25 +185,25 @@ __attribute__((always_inline)) static __INLINE void context_save(void)
     /* {r0-r3,r12,LR,PC,xPSR} are saved automatically on exception entry */
 
     /* save unsaved registers */
-    asm("mrs    r0, psp"            );      /* get stack pointer from user mode */
-    asm("stmdb  r0!,{r4-r11}"       );      /* save regs */
-    asm("stmdb  r0!,{lr}"           );      /* exception return value */
-/*  asm("vstmdb sp!, {s16-s31}"     ); */   /* TODO save FPU registers if needed */
-    asm("ldr    r1, =sched_active_thread" );      /* load address of current tcb */
-    asm("ldr    r1, [r1]"           );      /* dereference pdc */
-    asm("str    r0, [r1]"           );      /* write r0 to pdc->sp means current threads stack pointer */
+//     asm("mrs    r0, psp"            );      /* get stack pointer from user mode */
+//     asm("stmdb  r0!,{r4-r11}"       );      /* save regs */
+//     asm("stmdb  r0!,{lr}"           );      /* exception return value */
+// /*  asm("vstmdb sp!, {s16-s31}"     ); */    TODO save FPU registers if needed
+//     asm("ldr    r1, =sched_active_thread" );      /* load address of current tcb */
+//     asm("ldr    r1, [r1]"           );      /* dereference pdc */
+//     asm("str    r0, [r1]"           );      /* write r0 to pdc->sp means current threads stack pointer */
 }
 
 __attribute__((always_inline)) static __INLINE void context_restore(void)
 {
-    asm("ldr    r0, =sched_active_thread" );      /* load address of current TCB */
-    asm("ldr    r0, [r0]"           );      /* dereference TCB */
-    asm("ldr    r1, [r0]"           );      /* load tcb->sp to register 1 */
-    asm("ldmia  r1!, {r0}"          );      /* restore exception return value from stack */
-/*  asm("pop    {s16-s31}"          ); */   /* TODO load FPU register if needed depends on r0 exret */
-    asm("ldmia  r1!, {r4-r11}"      );      /* restore other registers */
-    asm("msr    psp, r1"            );      /* restore PSP register (user mode SP)*/
-    asm("bx     r0"                 );      /* load exception return value to PC causes end of exception*/
+  //   asm("ldr    r0, =sched_active_thread" );      /* load address of current TCB */
+  //   asm("ldr    r0, [r0]"           );      /* dereference TCB */
+  //   asm("ldr    r1, [r0]"           );      /* load tcb->sp to register 1 */
+  //   asm("ldmia  r1!, {r0}"          );      /* restore exception return value from stack */
+  // asm("pop    {s16-s31}"          );    /* TODO load FPU register if needed depends on r0 exret */
+  //   asm("ldmia  r1!, {r4-r11}"      );      /* restore other registers */
+  //   asm("msr    psp, r1"            );      /* restore PSP register (user mode SP)*/
+  //   asm("bx     r0"                 );      /* load exception return value to PC causes end of exception*/
 
     /* {r0-r3,r12,LR,PC,xPSR} are restored automatically on exception return */
 }
