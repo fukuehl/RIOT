@@ -36,8 +36,38 @@ void board_init(void)
     /* initialize the boards LEDs */
     leds_init();
 
-    for (int i = 0; i < 10000000; i++) {
-        LED_RED_TOGGLE;
+    while (1) {
+
+        for (int i = 0; i < 1000000; i++) {
+            asm("nop");
+        }
+        LED_RED_OFF;
+        LED_GREEN_OFF;
+        LED_BLUE_OFF;
+        for (int i = 0; i < 1000000; i++) {
+            asm("nop");
+        }
+        LED_RED_ON;
+        for (int i = 0; i < 1000000; i++) {
+            asm("nop");
+        }
+        LED_RED_OFF;
+        for (int i = 0; i < 1000000; i++) {
+            asm("nop");
+        }
+        LED_GREEN_ON;
+        for (int i = 0; i < 1000000; i++) {
+            asm("nop");
+        }
+        LED_GREEN_OFF;
+        for (int i = 0; i < 1000000; i++) {
+            asm("nop");
+        }
+        LED_BLUE_ON;
+        for (int i = 0; i < 1000000; i++) {
+            asm("nop");
+        }
+        LED_BLUE_OFF;
     }
 }
 
@@ -55,8 +85,8 @@ void board_init(void)
 void leds_init(void)
 {
     /* set LED pins to function as output */
-    NRF_GPIO->DIRSET |= (LED_RED_PIN | LED_GREEN_PIN | LED_BLUE_PIN);
+    NRF_GPIO->DIRSET = (LED_RED_PIN | LED_GREEN_PIN | LED_BLUE_PIN);
 
     /* turn all LEDs off */
-    NRF_GPIO->OUTCLR |= (LED_RED_PIN | LED_GREEN_PIN | LED_BLUE_PIN);
+    NRF_GPIO->OUTCLR = (LED_RED_PIN | LED_GREEN_PIN | LED_BLUE_PIN);
 }
