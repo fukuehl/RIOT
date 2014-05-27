@@ -47,6 +47,7 @@ int uart_init(uart_t uart, uint32_t baudrate, void (*rx_cb)(char), void (*tx_cb)
 
 int uart_init_blocking(uart_t uart, uint32_t baudrate)
 {
+/*hier anfangen Register beschreiben und clocks etc 115200 standard baudrate Arduino DUO code abgleichen*/
     return 0;
 }
 
