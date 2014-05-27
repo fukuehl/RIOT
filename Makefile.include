@@ -68,7 +68,8 @@ BASELIBS += $(USEPKG:%=${BINDIR}%.a)
 .PHONY: all clean flash doc term objsize buildsize buildsizes buildsizes-diff
 
 export ELFFILE ?= $(BINDIR)$(APPLICATION).elf
-export HEXFILE ?= $(ELFFILE:.elf=.hex)
+#export HEXFILE ?= $(ELFFILE:.elf=.hex)
+export HEXFILE ?= $(ELFFILE:.elf=.bin)
 
 ## make script for your application. Build RIOT-base here!
 all: $(BINDIR)$(APPLICATION).a
