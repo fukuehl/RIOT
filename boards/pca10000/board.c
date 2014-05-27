@@ -19,7 +19,7 @@
  */
 
 #include "board.h"
-
+#include "nrf51.h"
 
 extern void SystemInit(void);
 void leds_init(void);

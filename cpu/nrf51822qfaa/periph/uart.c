@@ -23,6 +23,7 @@
 #include "cpu.h"
 #include "periph_conf.h"
 #include "periph/uart.h"
+#include "nrf51.h"
 
 
 /**
@@ -64,16 +65,60 @@ void uart_tx_end(uart_t uart)
 
 int uart_write(uart_t uart, char data)
 {
-    return -1;
+	/*copy from cpu/sam3x8e/periph/uart.c*/
+	//TODO Register adjust
+    switch (uart) {
+        case UART_0:
+        	  NRF_UART0->TXD = (uint8_t)data;
+
+        	  while (NRF_UART0->EVENTS_TXDRDY!=1)
+        	  {
+        	    // Wait for TXD data to be sent
+        	  }
+
+        	  NRF_UART0->EVENTS_TXDRDY=0;
+            break;
+        case UART_UNDEFINED:
+            return -1;
+    }
+    return 1;
 }
 
 int uart_read_blocking(uart_t uart, char *data)
-{
+{	/*copy from cpu/sam3x8e/periph/uart.c*/
+	//TODO adjust Registers
     return -1;
+    switch (uart) {
+        case UART_0:
+        	  uint_fast8_t i = 0;
+        	  uint8_t ch = data[i++];
+        	  while (ch != '\0')
+        	  {
+        	    uart_write(ch);
+        	    ch = data[i++];
+        	  }
+
+            //while (!(UART_0_DEV->UART_SR & UART_SR_RXRDY));
+            //*data = (char)UART_0_DEV->UART_RHR;
+            break;
+        case UART_UNDEFINED:
+            return -1;
+    }
+    return 1;
 }
 
 int uart_write_blocking(uart_t uart, char data)
-{
-    return -1;
+{	/*copy from cpu/sam3x8e/periph/uart.c*/
+	//TODO adjust Registers
+    switch (uart) {
+        case UART_0:
+            //while (!(UART_0_DEV->UART_SR & UART_SR_TXRDY));
+            //UART_0_DEV->UART_THR = data;
+            break;
+        case UART_UNDEFINED:
+            return -1;
+    }
+    return 1;
+
 }
 
