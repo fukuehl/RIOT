@@ -1,9 +1,7 @@
-export PROJECT = test_nativenet
+APPLICATION = test_nativenet
 include ../Makefile.tests_common
 
-ifeq (,$(filter native,$(BOARD)))
-include $(RIOTBASE)/Makefile.unsupported
-else
+BOARD_WHITELIST := native
 
 USEMODULE += nativenet
 USEMODULE += transceiver
@@ -14,7 +12,5 @@ FORCE:
 	touch main.c
 
 sender: CFLAGS += -DSENDER
-sender: PROJECT = test_nativenet_sender
+sender: APPLICATION = test_nativenet_sender
 sender: FORCE all
-
-endif

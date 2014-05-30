@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Freie Universität Berlin
+ * Copyright (C) 2014 Freie Universität Berlin
  *
  * This file is subject to the terms and conditions of the GNU Lesser General
  * Public License. See the file LICENSE in the top level directory for more
@@ -21,9 +21,26 @@
 #ifndef BITARITHM_H_
 #define BITARITHM_H_
 
-#define BS(val, bit)        ((val) & (bit))
-#define BS_COND(condition, target, mask)        (target) ^= ( (-(condition) ^ (target)) & (mask) )
+/**
+ * @def SETBIT
+ * @brief Sets a bitbitmask for a bitfield
+ *
+ * @param[in] val   The bitfield
+ * @param[in] bit   Specifies the bits to be set
+ *
+ * @return The modified bitfield
+ */
 #define SETBIT(val, bit)    val |= (bit)
+
+/**
+ * @def CLRBIT
+ * @brief Clears bitmask for a bitfield
+ *
+ * @param[in] val   The bitfield
+ * @param[in] bit   Specifies the bits to be cleared
+ *
+ * @return The modified bitfield
+ */
 #define CLRBIT(val, bit)    val &= (~(bit))
 
 /**
@@ -68,7 +85,7 @@
 #endif
 /** @} */
 
-#define ARCH_32_BIT   (__INT_MAX__ == 2147483647)
+#define ARCH_32_BIT   (__INT_MAX__ == 2147483647) /**< 1 for 32 bit architectures, 0 otherwise */
 
 /**
  * @brief   Returns the number of the highest '1' bit in a value
@@ -77,7 +94,7 @@
  *
  * Source: http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogObvious
  */
-unsigned number_of_highest_bit(unsigned v);
+unsigned bitarithm_msb(unsigned v);
 
 /**
  * @brief   Returns the number of the lowest '1' bit in a value
@@ -87,7 +104,7 @@ unsigned number_of_highest_bit(unsigned v);
  *
  * Source: http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogObvious
  */
-unsigned number_of_lowest_bit(register unsigned v);
+unsigned bitarithm_lsb(register unsigned v);
 
 /**
  * @brief   Returns the number of bits set in a value
@@ -96,7 +113,7 @@ unsigned number_of_lowest_bit(register unsigned v);
  *
  * Source: http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogObvious
  */
-unsigned number_of_bits_set(unsigned v);
+unsigned bitarithm_bits_set(unsigned v);
 
-/** @} */
 #endif /* BITARITHM_H_ */
+/** @} */

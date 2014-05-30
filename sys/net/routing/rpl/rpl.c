@@ -209,7 +209,7 @@ uint8_t rpl_init(int if_id)
 
     /* INSERT NEW OBJECTIVE FUNCTIONS HERE */
     objective_functions[0] = rpl_get_of0();
-    /* objective_functions[1] = rpl_get_of_ETX() */
+    objective_functions[1] = rpl_get_of_mrhof();
 
     sixlowpan_lowpan_init_interface(if_id);
     /* need link local prefix to query _our_ corresponding address  */
@@ -874,7 +874,7 @@ void recv_rpl_dao(void)
 
                 len += rpl_opt_transit_buf->length + 2;
                 /* route lifetime seconds = (DAO lifetime) * (Unit Lifetime) */
-                DEBUG("%s, %d: Adding routing information: Target: %s, Source: %s, Lifetime: %u\n", 
+                DEBUG("%s, %d: Adding routing information: Target: %s, Source: %s, Lifetime: %u\n",
                         __FILE__, __LINE__,
                         ipv6_addr_to_str(addr_str, IPV6_MAX_ADDR_STR_LEN, &ipv6_buf->srcaddr),
                         ipv6_addr_to_str(addr_str, IPV6_MAX_ADDR_STR_LEN, &ipv6_buf->srcaddr),

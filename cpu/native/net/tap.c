@@ -1,7 +1,7 @@
 /**
  * tap.h implementation
  *
- * Copyright (C) 2013 Ludwig Ortmann
+ * Copyright (C) 2013 Ludwig Ortmann <ludwig.ortmann@fu-berlin.de>
  *
  * This file is subject to the terms and conditions of the GNU Lesser General
  * Public License. See the file LICENSE in the top level directory for more
@@ -31,6 +31,13 @@
 #undef _POSIX_C_SOURCE
 #include <ifaddrs.h>
 #include <net/if_dl.h>
+
+#elif defined(__FreeBSD__)
+#include <sys/socket.h>
+#include <net/if.h>
+#include <ifaddrs.h>
+#include <net/if_dl.h>
+
 #else
 #include <net/if.h>
 #include <linux/if_tun.h>
@@ -144,7 +151,7 @@ void _native_handle_tap_input(void)
 #ifdef __MACH__
 void sigio_child()
 {
-    pid_t parent = getpid();
+    pid_t parent = _native_pid;
 
     if ((sigio_child_pid = fork()) == -1) {
         err(EXIT_FAILURE, "sigio_child: fork");
@@ -232,6 +239,9 @@ int tap_init(char *name)
 #ifdef __MACH__ /* OSX */
     char clonedev[255] = "/dev/"; /* XXX bad size */
     strncpy(clonedev+5, name, 250);
+#elif defined(__FreeBSD__)
+    char clonedev[255] = "/dev/"; /* XXX bad size */
+    strncpy(clonedev+5, name, 250);
 #else /* Linux */
     struct ifreq ifr;
     const char *clonedev = "/dev/net/tun";
@@ -242,7 +252,7 @@ int tap_init(char *name)
         err(EXIT_FAILURE, "open(%s)", clonedev);
     }
 
-#ifdef __MACH__ /* OSX */
+#if (defined(__MACH__) || defined(__FreeBSD__)) /* OSX/FreeBSD */
     struct ifaddrs* iflist;
     if (getifaddrs(&iflist) == 0) {
         for (struct ifaddrs *cur = iflist; cur; cur = cur->ifa_next) {
@@ -305,7 +315,7 @@ int tap_init(char *name)
     sigio_child();
 #else
     /* configure fds to send signals on io */
-    if (fcntl(_native_tap_fd, F_SETOWN, getpid()) == -1) {
+    if (fcntl(_native_tap_fd, F_SETOWN, _native_pid) == -1) {
         err(EXIT_FAILURE, "tap_init(): fcntl(F_SETOWN)");
     }
 

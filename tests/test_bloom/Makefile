@@ -1,11 +1,8 @@
-export PROJECT = test_bloom
+export APPLICATION = test_bloom
 include ../Makefile.tests_common
 
-ifneq (,$(filter msb-430,$(BOARD)))
-	include $(RIOTBASE)/Makefile.unsupported
-elifneq (,$(filter msb-430h,$(BOARD)))
-	include $(RIOTBASE)/Makefile.unsupported
-endif
+BOARD_INSUFFICIENT_RAM := chronos mbed_lpc1768 msb-430 msb-430h redbee-econotag \
+                          telosb wsn430-v1_3b wsn430-v1_4 z1
 
 USEMODULE += hashes
 USEMODULE += bloom

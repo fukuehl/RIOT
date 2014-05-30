@@ -36,10 +36,6 @@ See the file LICENSE in the top level directory for more details.
 
 #define WORDSIZE 16
 
-/* CPU speed, to be defined in board.h */
-//#define F_CPU               (2457600ul)
-//#define F_RC_OSCILLATOR     (32768) ///< Frequency of internal RC oscillator
-
 extern volatile int __inISR;
 extern char __isr_stack[MSP430_ISR_STACK_SIZE];
 
@@ -61,12 +57,12 @@ inline void __save_context_isr(void)
     __asm__("push r5");
     __asm__("push r4");
 
-    __asm__("mov.w r1,%0" : "=r"(active_thread->sp));
+    __asm__("mov.w r1,%0" : "=r"(sched_active_thread->sp));
 }
 
 inline void __restore_context_isr(void)
 {
-    __asm__("mov.w %0,r1" : : "m"(active_thread->sp));
+    __asm__("mov.w %0,r1" : : "m"(sched_active_thread->sp));
 
     __asm__("pop r4");
     __asm__("pop r5");

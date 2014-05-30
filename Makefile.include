@@ -1,3 +1,6 @@
+# Provide a shallow sanity check. You cannot call `make` in the root directory.
+export __RIOTBUILD_FLAG := RIOT
+
 # set undefined variables
 RIOTBASE ?= $(shell dirname "$(lastword $(MAKEFILE_LIST))")
 export RIOTBASE := $(abspath $(RIOTBASE))
@@ -31,7 +34,8 @@ CFLAGS += -DBOARD_$(BB) -DCPU_$(CPUDEF)
 
 export CFLAGS
 
-export BINDIR =$(CURDIR)/bin/$(BOARD)/
+export BINDIRBASE ?= $(CURDIR)/bin
+export BINDIR ?= $(abspath $(BINDIRBASE)/$(BOARD))/
 
 ifeq ($(QUIET),1)
 	AD=@
@@ -53,63 +57,43 @@ ifneq (, $(filter $(DISABLE_MODULE), $(USEMODULE)))
 $(error "Required modules were disabled using DISABLE_MODULE: $(sort $(filter $(DISABLE_MODULE), $(USEMODULE)))")
 endif
 
-# Test if the input language was specified externally.
-# Otherwise test if the compiler unterstands the "-std=gnu99" flag, and use it if so.
-# Otherwise test if the compiler unterstands the "-std=c99" flag, and use it if so.
-ifeq ($(filter -std=%,$(CFLAGS)),)
-ifeq ($(shell $(CC) -std=gnu99 -E - 2>/dev/null >/dev/null </dev/null ; echo $$?),0)
-CFLAGS += -std=gnu99
-else
-ifeq ($(shell $(CC) -std=c99 -E - 2>/dev/null >/dev/null </dev/null ; echo $$?),0)
-CFLAGS += -std=c99
-endif
-endif
-endif
+# Feature test default CFLAGS and LINKFLAGS for the set compiled.
+include $(RIOTBASE)/Makefile.cflags
 
-# Add `-fno-delete-null-pointer-checks` flag iff the compiler supports it.
-# GCC removes moves tests whether `x == NULL`, if previously `x` or even `x->y` was accessed.
-# 0x0 might be a sane memory location for embedded systems, so the test must not be removed.
-# Right now clang does not use the *delete-null-pointer* optimization, and does not understand the parameter.
-# Related issues: #628, #664.
-ifeq ($(shell $(CC) -fno-delete-null-pointer-checks -E - 2>/dev/null >/dev/null </dev/null ; echo $$?),0)
-ifeq ($(shell LANG=C $(CC) -fno-delete-null-pointer-checks -E - 2>&1 1>/dev/null </dev/null | grep warning: | grep -- -fno-delete-null-pointer-checks),)
-CFLAGS += -fno-delete-null-pointer-checks
-endif
-endif
-
-# your binaries to link
+# the binaries to link
 BASELIBS += $(BINDIR)$(BOARD)_base.a
-BASELIBS += $(BINDIR)${PROJECT}.a
+BASELIBS += $(BINDIR)${APPLICATION}.a
 BASELIBS += $(USEPKG:%=${BINDIR}%.a)
 
-.PHONY: all clean flash doc term
+.PHONY: all clean flash doc term objsize buildsize buildsizes buildsizes-diff
+
+export ELFFILE ?= $(BINDIR)$(APPLICATION).elf
+#export HEXFILE ?= $(ELFFILE:.elf=.hex)
+export HEXFILE ?= $(ELFFILE:.elf=.bin)
 
 ## make script for your application. Build RIOT-base here!
-all: $(BINDIR)$(PROJECT).a
-	@echo "Building application $(PROJECT) for $(BOARD) w/ MCU $(MCU)."
+all: $(BINDIR)$(APPLICATION).a
+	@echo "Building application $(APPLICATION) for $(BOARD) w/ MCU $(MCU)."
 	"$(MAKE)" -C $(RIOTBOARD)/$(BOARD)
 	"$(MAKE)" -C $(RIOTBASE)
+ifeq (,$(RIOTNOLINK))
 ifeq ($(BUILDOSXNATIVE),1)
-	$(AD)$(LINK) $(UNDEF) -o $(BINDIR)$(PROJECT).elf $(BASELIBS) $(LINKFLAGS) -Wl,-no_pie
+	$(AD)$(LINK) $(UNDEF) -o $(ELFFILE) $(BASELIBS) $(LINKFLAGS) -Wl,-no_pie
 else
-	$(AD)$(LINK) $(UNDEF) -o $(BINDIR)$(PROJECT).elf -Wl,--start-group $(BASELIBS) -lm -Wl,--end-group  -Wl,-Map=$(BINDIR)$(PROJECT).map $(LINKFLAGS)
+	$(AD)$(LINK) $(UNDEF) -o $(ELFFILE) -Wl,--start-group $(BASELIBS) -lm -Wl,--end-group  -Wl,-Map=$(BINDIR)$(APPLICATION).map $(LINKFLAGS)
 endif
-	$(AD)$(SIZE) $(BINDIR)$(PROJECT).elf
-	$(AD)$(OBJCOPY) $(OFLAGS) $(BINDIR)$(PROJECT).elf $(BINDIR)$(PROJECT).hex
-
-## your make rules
-## Only basic example - modify it for larger applications!!
-#$(BINDIR)/$(PROJECT).a: $(BINDIR)/$(PROJECT).o
-#	$(AR) -rc $(BINDIR)/project.a $(BINDIR)/$(PROJECT).o
+	$(AD)$(SIZE) $(ELFFILE)
+	$(AD)$(OBJCOPY) $(OFLAGS) $(ELFFILE) $(HEXFILE)
+endif
 
 # string array of all names of c files in dir
 SRC = $(wildcard *.c)
 
 # string array of all names replaced .c with .o
-OBJ = $(SRC:%.c=${BINDIR}${PROJECT}/%.o)
+OBJ = $(SRC:%.c=${BINDIR}${APPLICATION}/%.o)
 
-$(BINDIR)$(PROJECT).a: $(OBJ)
-	$(AD)$(AR) -rc $(BINDIR)$(PROJECT).a $(OBJ)
+$(BINDIR)$(APPLICATION).a: $(OBJ)
+	$(AD)$(AR) -rc $(BINDIR)$(APPLICATION).a $(OBJ)
 
 # add extra include paths for packages in $(USEMODULE)
 export USEMODULE_INCLUDES =
@@ -120,6 +104,11 @@ include $(RIOTBASE)/drivers/Makefile.include
 USEMODULE_INCLUDES_ = $(shell echo $(USEMODULE_INCLUDES) | tr ' ' '\n' | awk '!a[$$0]++' | tr '\n' ' ')
 
 INCLUDES += $(USEMODULE_INCLUDES_:%=-I%)
+
+# The `clean` needs to be serialized before everything else.
+ifneq (, $(filter clean, $(MAKECMDGOALS)))
+    $(OBJ) $(BASELIBS) $(USEPKG:%=$(RIOTBASE)/pkg/%/Makefile.include): clean
+endif
 
 # include Makefile.includes for packages in $(USEPKG)
 $(RIOTBASE)/pkg/%/Makefile.include::
@@ -132,19 +121,18 @@ $(RIOTBASE)/pkg/%/Makefile.include::
 # pull in dependency info for *existing* .o files
 -include $(OBJ:.o=.d)
 
-$(BINDIR)$(PROJECT)/%.o: %.c $(PROJDEPS) $(USEPKG:%=${BINDIR}%.a)
-	@mkdir -p ${BINDIR}
+$(BINDIR)$(APPLICATION)/%.o: %.c $(PROJDEPS) $(USEPKG:%=${BINDIR}%.a)
 	@echo; echo "Compiling.... $*.c"; echo
-	@test -d $(BINDIR)$(PROJECT) || mkdir -p $(BINDIR)$(PROJECT)
-	$(AD)$(CC) $(CFLAGS) $(INCLUDES) -c $*.c -o $(BINDIR)$(PROJECT)/$*.o
+	$(AD)mkdir -p "$(dir $@)"
+	$(AD)$(CC) $(CFLAGS) $(INCLUDES) -c "$<" -o "$@"
 
-$(USEPKG:%=${BINDIR}%.a)::
+$(USEPKG:%=${BINDIR}%.a):
 	@mkdir -p ${BINDIR}
 	"$(MAKE)" -C $(RIOTBASE)/pkg/$(patsubst ${BINDIR}%.a,%,$@)
 
 clean:
 	@for i in $(USEPKG) ; do "$(MAKE)" -C $(RIOTBASE)/pkg/$$i clean || exit 1; done
-	rm -rf $(BINDIR)
+	rm -rf $(BINDIR) $(CLEANFILES)
 
 flash: all
 	$(FLASHER) $(FFLAGS)
@@ -158,44 +146,5 @@ doc:
 debug:
 	$(DEBUGGER) $(DEBUGGER_FLAGS)
 
-buildtest:
-	@if [ -z "$${JENKINS_URL}" ] && tput colors 2>&1 > /dev/null; then \
-		GREEN='\033[1;32m'; RED='\033[1;31m'; RESET='\033[0m'; \
-		ECHO='/bin/echo -e'; \
-	else \
-		GREEN=''; RED=''; RESET=''; \
-		ECHO='/bin/echo'; \
-	fi; \
-	\
-	if [ -z "$(BOARD_WHITELIST)" ]; then \
-		BOARDS=$$(find $(RIOTBOARD) -mindepth 1 -maxdepth 1 -type d \! -name \*-common -printf '%f\n' ); \
-	else \
-		BOARDS="$(BOARD_WHITELIST)"; \
-	fi; \
-	\
-	for BOARD in $(BOARD_BLACKLIST); do \
-		echo "Ignoring $${BOARD} (blacklisted)"; \
-		BOARDS=$$(echo \ $${BOARDS}\  | sed -e 's/ '$${BOARD}' / /'); \
-	done; \
-	\
-	for BOARD in $${BOARDS}; do \
-		$${ECHO} -n "Building for $${BOARD} .. "; \
-		LOG=$$(env -i \
-			HOME=$${HOME} \
-			PATH=$${PATH} \
-			BOARD=$${BOARD} \
-			RIOTBASE=$${RIOTBASE} \
-			RIOTBOARD=$${RIOTBOARD} \
-			RIOTCPU=$${RIOTCPU} \
-			$(MAKE) -B clean all 2>&1 >/dev/null) ; \
-		if [ "$${?}" = "0" ]; then \
-			$${ECHO} "$${GREEN}success$${RESET}"; \
-		else \
-			$${ECHO} "$${RED}failed$${RESET}"; \
-			echo "$${LOG}" | grep -v -E '^make(\[[[:digit:]]])?:'; \
-			BUILDTESTFAILED=1; \
-		fi; \
-	done; \
-	if [ "$${BUILDTESTFAILED}" = "1" ]; then \
-		exit 1; \
-	fi
+# Extra make goals for testing and comparing changes.
+include $(RIOTBASE)/Makefile.buildtests

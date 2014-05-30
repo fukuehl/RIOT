@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2013 Freie Universität Berlin
+ * Copyright (C) 2014 Freie Universität Berlin
  *
- * This file subject to the terms and conditions of the GNU Lesser General
+ * This file is subject to the terms and conditions of the GNU Lesser General
  * Public License. See the file LICENSE in the top level directory for more
  * details.
  */
@@ -25,9 +25,14 @@
 #include <stddef.h>
 #include "bitarithm.h"
 #include "tcb.h"
+#include "attributes.h"
 
-#define MAXTHREADS 32
+#define MAXTHREADS 32 /**< the maximum number of threads to be scheduled */
 
+/**
+ * @def SCHED_PRIO_LEVELS
+ * @brief The number of thread priority levels
+ */
 #if ARCH_32_BIT
 #define SCHED_PRIO_LEVELS 32
 #else
@@ -35,7 +40,7 @@
 #endif
 
 /**
- * @brief   Triggers the scheduler to schedule the next task
+ * @brief   Triggers the scheduler to schedule the next thread
  */
 void sched_run(void);
 
@@ -59,9 +64,9 @@ void sched_set_status(tcb_t *process, unsigned int status);
 void sched_switch(uint16_t current_prio, uint16_t other_prio);
 
 /**
- * @brief   Call context switching at task exit
+ * @brief   Call context switching at thread exit
  */
-void cpu_switch_context_exit(void);
+NORETURN void cpu_switch_context_exit(void);
 
 /**
  * Flag indicating whether a context switch is necessary after handling an
@@ -77,27 +82,37 @@ extern volatile tcb_t *sched_threads[MAXTHREADS];
 /**
  *  Currently active thread
  */
-extern volatile tcb_t *active_thread;
+extern volatile tcb_t *sched_active_thread;
 
 /**
  *  Number of running (non-terminated) threads
  */
-extern volatile int num_tasks;
+extern volatile int sched_num_threads;
 
 /**
  *  Process ID of active thread
  */
-extern volatile int thread_pid;
+extern volatile int sched_active_pid;
+
+/**
+ *  Process ID of the thread that was active before the current one
+ */
+extern volatile int last_pid;
+
+/**
+ * List of runqueues per priority level
+ */
+extern clist_node_t *runqueues[SCHED_PRIO_LEVELS];
 
 #if SCHEDSTATISTICS
 /**
  *  Scheduler statistics
  */
 typedef struct {
-    unsigned int laststart; /*< Time stamp of the last time this thread was
-                                scheduled to run */
-    unsigned int schedules; /*< How often the thread was scheduled to run */
-    unsigned long runtime_ticks;   /*< The total runtime of this thread in ticks */
+    unsigned int laststart;         /**< Time stamp of the last time this thread was
+                                         scheduled to run */
+    unsigned int schedules;         /**< How often the thread was scheduled to run */
+    unsigned long runtime_ticks;    /**< The total runtime of this thread in ticks */
 } schedstat;
 
 /**
@@ -106,10 +121,13 @@ typedef struct {
 extern schedstat pidlist[MAXTHREADS];
 
 /**
- *  Register a callback that will be called on every scheduler run
+ *  @brief  Register a callback that will be called on every scheduler run
+ *
+ *  @param[in] callback The callback functions the will be called
  */
 void sched_register_cb(void (*callback)(uint32_t, uint32_t));
+
 #endif
 
-/** @} */
 #endif // _SCHEDULER_H
+/** @} */

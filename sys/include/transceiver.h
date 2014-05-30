@@ -1,8 +1,11 @@
-
 /**
  * @defgroup    sys_transceiver Transceiver
  * @ingroup     sys
+ * @{
+ *
+ * @file        transceiver.h
  * @brief       Transceiver library
+ * @author      Oliver Hahm <oliver.hahm@inria.fr>
  */
 
 #ifndef TRANSCEIVER_H
@@ -98,9 +101,9 @@
 #endif
 #endif
 #ifdef MODULE_MC1322X
-#if (MC1322X_MAX_DATA_LENGTH > PAYLOAD_SIZE)
+#if (MACA_MAX_PAYLOAD_SIZE > PAYLOAD_SIZE)
 #undef PAYLOAD_SIZE
-#define PAYLOAD_SIZE (MC1322X_MAX_DATA_LENGTH)
+#define PAYLOAD_SIZE (MACA_MAX_PAYLOAD_SIZE)
 #endif
 #endif
 #ifdef MODULE_NATIVENET
@@ -220,3 +223,4 @@ int transceiver_start(void);
 uint8_t transceiver_register(transceiver_type_t transceivers, int pid);
 
 #endif /* TRANSCEIVER_H */
+/** @} */

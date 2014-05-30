@@ -23,6 +23,7 @@
 #include <stdio.h>
 
 #include "crash.h"
+#include "native_internal.h"
 
 /* "public" variables holding the crash data (look for them in your debugger) */
 char panic_str[80];
@@ -53,18 +54,12 @@ NORETURN void core_panic(int crash_code, const char *message)
 #if DEVELHELP
     /* since we're atop an Unix-like platform,
        just use the (developer-)friendly core-dump feature */
-    kill(getpid(), SIGTRAP);
+    kill(_native_pid, SIGTRAP);
 #else
     (void) reboot(RB_AUTOBOOT);
 #endif
 
     /* tell the compiler that we won't return from this function
        (even if we actually won't even get here...) */
-#if ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 5)) || (__GNUC__ >= 5)
-    __builtin_unreachable();
-#else
-    while (1) {
-        /* do nothing, but do it often */
-    }
-#endif
+    UNREACHABLE();
 }

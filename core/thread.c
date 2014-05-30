@@ -32,15 +32,15 @@
 #include "hwtimer.h"
 #include "sched.h"
 
-inline int thread_getpid()
+inline int thread_getpid(void)
 {
-    return active_thread->pid;
+    return sched_active_thread->pid;
 }
 
-int thread_getlastpid()
+int thread_getlastpid(void)
 {
-    extern int last_pid;
-    return last_pid;
+    extern int thread_last_pid;
+    return thread_last_pid;
 }
 
 int thread_getstatus(int pid)
@@ -61,14 +61,14 @@ const char *thread_getname(int pid)
     return sched_threads[pid]->name;
 }
 
-void thread_sleep()
+void thread_sleep(void)
 {
     if (inISR()) {
         return;
     }
 
     dINT();
-    sched_set_status((tcb_t *)active_thread, STATUS_SLEEPING);
+    sched_set_status((tcb_t *)sched_active_thread, STATUS_SLEEPING);
     eINT();
     thread_yield();
 }
@@ -86,7 +86,7 @@ int thread_wakeup(int pid)
         sched_set_status(other_thread, STATUS_RUNNING);
 
         restoreIRQ(old_state);
-        sched_switch(active_thread->priority, other_thread->priority);
+        sched_switch(sched_active_thread->priority, other_thread->priority);
 
         return 1;
     }
@@ -200,7 +200,7 @@ int thread_create(char *stack, int stacksize, char priority, int flags, void (*f
     cib_init(&(cb->msg_queue), 0);
     cb->msg_array = NULL;
 
-    num_tasks++;
+    sched_num_threads++;
 
     DEBUG("Created thread %s. PID: %u. Priority: %u.\n", name, cb->pid, priority);
 
@@ -221,7 +221,7 @@ int thread_create(char *stack, int stacksize, char priority, int flags, void (*f
         }
     }
 
-    if (!inISR() && active_thread != NULL) {
+    if (!inISR() && sched_active_thread != NULL) {
         eINT();
     }
 

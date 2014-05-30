@@ -7,11 +7,15 @@
  *
  * @defgroup    mbed_lpc1768 mbed NXP LPC1768 development kit
  * @ingroup		boards
+ * @brief       Support for the mbed NXP LPC1768 board.
  * @{
  */
 
 #include <stdint.h>
 #include "bitarithm.h"
+
+#define F_CPU                   (96000000)
+
 
 #define PIN_LED1 (BIT18)
 #define PIN_LED2 (BIT20)

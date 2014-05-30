@@ -73,7 +73,7 @@ extern uintptr_t __heap3_max;       ///< maximum for end of heap memory space
 /*-----------------------------------------------------------------------------------*/
 void __assert_func(const char *file, int line, const char *func, const char *failedexpr)
 {
-    printf("#!assertion %s failed\n\t%s() in %s:%u\n", failedexpr, func, file, line);
+    printf("#!assertion %s failed\n\t%s() in %s:%d\n", failedexpr, func, file, line);
     _exit(3);
 }
 /*-----------------------------------------------------------------------------------*/
@@ -265,7 +265,7 @@ void _exit(int n)
 /*---------------------------------------------------------------------------*/
 int _getpid(void)
 {
-    return active_thread->pid;
+    return sched_active_thread->pid;
 }
 /*---------------------------------------------------------------------------*/
 int _kill_r(struct _reent *r, int pid, int sig)
@@ -275,18 +275,6 @@ int _kill_r(struct _reent *r, int pid, int sig)
     /* not implemented */
     r->_errno = ESRCH;      // no such process
     return -1;
-}
-/*---------------------------------------------------------------------------*/
-int _gettimeofday(struct timeval *tp, void *restrict tzp) {
-    (void) tzp;
-#if defined MODULE_RTC
-    rtc_time(tp);
-#elif defined MODULE_VTIMER
-    vtimer_gettimeofday(tp);
-#else
-#warning gettimeofday syscall is not implemented without vtimer or rtc module
-#endif
-    return 0;
 }
 
 void _init(void) {}

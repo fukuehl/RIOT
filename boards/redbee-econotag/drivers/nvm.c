@@ -2,8 +2,9 @@
  * nvm.c - non-volatile memory implementations
  * Copyright (C) 2013 Thomas Eichinger <thomas.eichinger@fu-berlin.de>
  *
- * This source code is licensed under the GNU General Public License,
- * Version 3.  See the file LICENSE for more details.
+ * This file is subject to the terms and conditions of the GNU Lesser General
+ * Public License. See the file LICENSE in the top level directory for more
+ * details.
  *
  * This file is part of RIOT.
  */
@@ -18,5 +19,5 @@ nvm_err_t (*nvm_write)  (nvm_interface_t nvm_interface, nvm_type_t nvm_type, voi
                         = (void*) 0x00006ec5;
 nvm_err_t (*nvm_erase)  (nvm_interface_t nvm_interface, nvm_type_t nvm_type, uint32_t sector_bitfield)
                         = (void*) 0x00006e05;
-void (*nvm_sets_var)    (uint32_t zero_is_for_winners)
+void (*nvm_setsvar)    (uint32_t zero_is_for_winners)
                         = (void*) 0x00007085;

@@ -62,29 +62,17 @@ endif
 ifneq (,$(filter rpl,$(USEMODULE)))
     DIRS += net/routing/rpl
 endif
+ifneq (,$(filter routing,$(USEMODULE)))
+	DIRS += net/routing
+endif
 ifneq (,$(filter ieee802154,$(USEMODULE)))
     DIRS += net/link_layer/ieee802154
 endif
 ifneq (,$(filter bloom,$(USEMODULE)))
     DIRS += bloom
 endif
-ifneq (,$(filter crypto_3des,$(USEMODULE)))
-    DIRS += crypto/3des
-endif
-ifneq (,$(filter crypto_aes,$(USEMODULE)))
-    DIRS += crypto/aes
-endif
-ifneq (,$(filter crypto_rc5,$(USEMODULE)))
-    DIRS += crypto/rc5
-endif
-ifneq (,$(filter crypto_sha256,$(USEMODULE)))
-    DIRS += crypto/sha256
-endif
-ifneq (,$(filter crypto_skipjack,$(USEMODULE)))
-    DIRS += crypto/skipjack
-endif
-ifneq (,$(filter crypto_twofish,$(USEMODULE)))
-    DIRS += crypto/twofish
+ifneq (,$(filter crypto,$(USEMODULE)))
+    DIRS += crypto
 endif
 ifneq (,$(filter random,$(USEMODULE)))
     DIRS += random
@@ -100,6 +88,9 @@ ifneq (,$(filter ccn_lite_client,$(USEMODULE)))
 endif
 ifneq (,$(filter quad_math,$(USEMODULE)))
     DIRS += quad_math
+endif
+ifneq (,$(filter oneway_malloc,$(USEMODULE)))
+    DIRS += oneway-malloc
 endif
 
 all: $(BINDIR)$(MODULE).a

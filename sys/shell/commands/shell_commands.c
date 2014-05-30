@@ -53,6 +53,9 @@ extern void _get_current_handler(int argc, char **argv);
 extern void _reset_current_handler(int argc, char **argv);
 #endif
 
+#ifdef CPU_X86
+extern void _x86_lspci(int argc, char **argv);
+#endif
 
 /* configure available commands for each transceiver device: */
 #ifdef MODULE_TRANSCEIVER
@@ -102,6 +105,10 @@ extern void _transceiver_set_ignore_handler(int argc, char **argv);
 
 #ifdef MODULE_NET_IF
 extern void _net_if_ifconfig(int argc, char **argv);
+#endif
+
+#ifdef MODULE_RPL
+extern void _rpl_route_handler(int argc, char **argv);
 #endif
 
 #ifdef MODULE_MCI
@@ -172,6 +179,9 @@ const shell_command_t _shell_command_list[] = {
 #ifdef MODULE_NET_IF
     {"ifconfig", "Configures a network interface", _net_if_ifconfig},
 #endif
+#ifdef MODULE_RPL
+    {"route", "Shows the routing table", _rpl_route_handler},
+#endif
 #ifdef MODULE_MCI
     {DISK_READ_SECTOR_CMD, "Reads the specified sector of inserted memory card", _read_sector},
     {DISK_READ_BYTES_CMD, "Reads the specified bytes from inserted memory card", _read_bytes},
@@ -182,6 +192,9 @@ const shell_command_t _shell_command_list[] = {
 #ifdef MODULE_RANDOM
     { "mersenne_init", "initializes the PRNG", _mersenne_init },
     { "mersenne_get", "returns 32 bit of pseudo randomness", _mersenne_get },
+#endif
+#ifdef CPU_X86
+    {"lspci", "Lists PCI devices", _x86_lspci},
 #endif
     {NULL, NULL, NULL}
 };

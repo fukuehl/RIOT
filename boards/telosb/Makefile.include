@@ -19,19 +19,15 @@ export FLASHER = goodfet.bsl
 ifeq ($(strip $(PORT)),)
     export PORT = /dev/ttyUSB0
 endif
-export HEXFILE = $(BINDIR)$(PROJECT).hex
+export HEXFILE = $(BINDIR)$(APPLICATION).hex
 export FFLAGS = --telosb -c $(PORT) -r -e -I -p $(HEXFILE)
 
 export INCLUDES += -I$(RIOTCPU)/msp430-common/include -I$(RIOTBOARD)/$(BOARD)/include -I$(RIOTBASE)/drivers/cc2420/include -I$(RIOTBASE)/sys/net/include
 export OFLAGS = -O ihex
 
 ifneq (,$(filter defaulttransceiver,$(USEMODULE)))
-	ifeq (,$(filter cc2240,$(USEMODULE)))
-		USEMODULE += cc2420
-	endif
-	ifeq (,$(filter transceiver,$(USEMODULE)))
-		USEMODULE += transceiver
-	endif
+	USEMODULE += cc2420
+	USEMODULE += transceiver
 endif
 
 export UNDEF += $(BINDIR)msp430_common/startup.o

@@ -25,6 +25,9 @@ endif
 ifneq (,$(filter ps,$(USEMODULE)))
 	SRC += sc_ps.c
 endif
+ifneq (,$(filter rpl,$(USEMODULE)))
+	SRC += sc_rpl.c
+endif
 ifneq (,$(filter rtc,$(USEMODULE)))
 	SRC += sc_rtc.c
 endif
@@ -36,6 +39,9 @@ ifneq (,$(filter lpc_common,$(USEMODULE)))
 endif
 ifneq (,$(filter random,$(USEMODULE)))
 	SRC += sc_mersenne.c
+endif
+ifeq ($(CPU),x86)
+	SRC += sc_x86_lspci.c
 endif
 
 include $(RIOTBASE)/Makefile.base

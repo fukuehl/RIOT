@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2013 Freie Universität Berlin
  *
- * This file subject to the terms and conditions of the GNU Lesser General
+ * This file is subject to the terms and conditions of the GNU Lesser General
  * Public License. See the file LICENSE in the top level directory for more
  * details.
  */
@@ -79,6 +79,7 @@ static char pthread_reaper_stack[PTHREAD_REAPER_STACKSIZE];
 static void pthread_start_routine(void)
 {
     pthread_t self = pthread_self();
+
     pthread_thread_t *pt = pthread_sched_threads[self-1];
     void *retval = pt->start_routine(pt->arg);
     pthread_exit(retval);
@@ -157,45 +158,58 @@ int pthread_create(pthread_t *newthread, const pthread_attr_t *attr, void *(*sta
         return -1;
     }
 
-    sched_switch(active_thread->priority, PRIORITY_MAIN);
+    sched_switch(sched_active_thread->priority, PRIORITY_MAIN);
 
     return 0;
 }
 
 void pthread_exit(void *retval)
 {
-    pthread_thread_t *self = pthread_sched_threads[pthread_self()-1];
+    pthread_t self_id = pthread_self();
 
-    while (self->cleanup_top) {
-        __pthread_cleanup_datum_t *ct = self->cleanup_top;
-        self->cleanup_top = ct->__next;
-
-        ct->__routine(ct->__arg);
+    if (self_id == 0) {
+        DEBUG("ERROR called pthread_self() returned 0 in \"%s\"!\n", __func__);
     }
+    else {
+        pthread_thread_t *self = pthread_sched_threads[self_id-1];
 
-    self->thread_pid = -1;
-    DEBUG("pthread_exit(%p), self == %p\n", retval, (void *) self);
-    if (self->status != PTS_DETACHED) {
-        self->returnval = retval;
-        self->status = PTS_ZOMBIE;
+        while (self->cleanup_top) {
+            __pthread_cleanup_datum_t *ct = self->cleanup_top;
+            self->cleanup_top = ct->__next;
 
-        if (self->joining_thread) {
-            /* our thread got an other thread waiting for us */
-            thread_wakeup(self->joining_thread);
+            ct->__routine(ct->__arg);
+        }
+
+        self->thread_pid = -1;
+        DEBUG("pthread_exit(%p), self == %p\n", retval, (void *) self);
+        if (self->status != PTS_DETACHED) {
+            self->returnval = retval;
+            self->status = PTS_ZOMBIE;
+
+            if (self->joining_thread) {
+                /* our thread got an other thread waiting for us */
+                thread_wakeup(self->joining_thread);
+            }
+        }
+
+        dINT();
+        if (self->stack) {
+            msg_t m;
+            m.content.ptr = self->stack;
+            msg_send_int(&m, pthread_reaper_pid);
         }
     }
 
-    dINT();
-    if (self->stack) {
-        msg_t m;
-        m.content.ptr = self->stack;
-        msg_send_int(&m, pthread_reaper_pid);
-    }
     sched_task_exit();
 }
 
 int pthread_join(pthread_t th, void **thread_return)
 {
+    if (th < 1 || th > MAXTHREADS) {
+        DEBUG("passed pthread_t th (%d) exceeds bounds of pthread_sched_threads[] in \"%s\"!\n", th, __func__);
+        return -3;
+    }
+
     pthread_thread_t *other = pthread_sched_threads[th-1];
     if (!other) {
         return -1;
@@ -203,7 +217,7 @@ int pthread_join(pthread_t th, void **thread_return)
 
     switch (other->status) {
         case (PTS_RUNNING):
-            other->joining_thread = thread_pid;
+            other->joining_thread = sched_active_pid;
             /* go blocked, I'm waking up if other thread exits */
             thread_sleep();
             /* no break */
@@ -225,6 +239,11 @@ int pthread_join(pthread_t th, void **thread_return)
 
 int pthread_detach(pthread_t th)
 {
+    if (th < 1 || th > MAXTHREADS) {
+        DEBUG("passed pthread_t th (%d) exceeds bounds of pthread_sched_threads[] in \"%s\"!\n", th, __func__);
+        return -2;
+    }
+
     pthread_thread_t *other = pthread_sched_threads[th-1];
     if (!other) {
         return -1;
@@ -246,7 +265,7 @@ pthread_t pthread_self(void)
 {
     pthread_t result = 0;
     mutex_lock(&pthread_mutex);
-    int pid = thread_pid; /* thread_pid is volatile */
+    int pid = sched_active_pid; /* sched_active_pid is volatile */
     for (int i = 0; i < MAXTHREADS; i++) {
         if (pthread_sched_threads[i] && pthread_sched_threads[i]->thread_pid == pid) {
             result = i+1;
@@ -286,6 +305,12 @@ int pthread_setcanceltype(int type, int *oldtype)
 void pthread_testcancel(void)
 {
     pthread_t self = pthread_self();
+
+    if (self == 0) {
+        DEBUG("ERROR called pthread_self() returned 0 in \"%s\"!\n", __func__);
+        return;
+    }
+
     if (pthread_sched_threads[self-1]->should_cancel) {
         pthread_exit(PTHREAD_CANCELED);
     }
@@ -293,14 +318,28 @@ void pthread_testcancel(void)
 
 void __pthread_cleanup_push(__pthread_cleanup_datum_t *datum)
 {
-    pthread_thread_t *self = pthread_sched_threads[pthread_self()-1];
+    pthread_t self_id = pthread_self();
+
+    if (self_id == 0) {
+        DEBUG("ERROR called pthread_self() returned 0 in \"%s\"!\n", __func__);
+        return;
+    }
+
+    pthread_thread_t *self = pthread_sched_threads[self_id-1];
     datum->__next = self->cleanup_top;
     self->cleanup_top = datum;
 }
 
 void __pthread_cleanup_pop(__pthread_cleanup_datum_t *datum, int execute)
 {
-    pthread_thread_t *self = pthread_sched_threads[pthread_self()-1];
+    pthread_t self_id = pthread_self();
+
+    if (self_id == 0) {
+        DEBUG("ERROR called pthread_self() returned 0 in \"%s\"!\n", __func__);
+        return;
+    }
+
+    pthread_thread_t *self = pthread_sched_threads[self_id-1];
     self->cleanup_top = datum->__next;
 
     if (execute != 0) {
