@@ -86,15 +86,15 @@ int uart_write(uart_t uart, char data)
 
 int uart_read_blocking(uart_t uart, char *data)
 {	/*copy from cpu/sam3x8e/periph/uart.c*/
-	//TODO adjust Registers
     return -1;
+    //TODO adjust Registers
+    uint_fast8_t  i = 0;
+    uint8_t ch = data[i++];
     switch (uart) {
         case UART_0:
-        	  uint_fast8_t i = 0;
-        	  uint8_t ch = data[i++];
         	  while (ch != '\0')
         	  {
-        	    uart_write(ch);
+        	    uart_write(uart, ch);
         	    ch = data[i++];
         	  }
 
