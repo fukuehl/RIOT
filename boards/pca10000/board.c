@@ -38,40 +38,65 @@ void board_init(void)
 
     /* blink stuff */
     while (1) {
-
-        for (int i = 0; i < 1000000; i++) {
-            asm("nop");
-        }
         LED_RED_OFF;
         LED_GREEN_OFF;
         LED_BLUE_OFF;
-        for (int i = 0; i < 1000000; i++) {
-            asm("nop");
-        }
-        LED_RED_ON;
-        for (int i = 0; i < 1000000; i++) {
-            asm("nop");
-        }
-        LED_RED_OFF;
-        for (int i = 0; i < 1000000; i++) {
-            asm("nop");
-        }
-        LED_GREEN_ON;
-        for (int i = 0; i < 1000000; i++) {
-            asm("nop");
-        }
-        LED_GREEN_OFF;
-        for (int i = 0; i < 1000000; i++) {
-            asm("nop");
-        }
+        delay(1000000);
+	LED_RED_ON; // let green and red also shine
+        LED_GREEN_ON; // just in case blue is not connected
+        // send SOS via morse :):
+	// send S - that is 3 shors:
+	LED_BLUE_ON;
+        delay(1000000);
+        LED_BLUE_OFF;
+	delay(1000000);
         LED_BLUE_ON;
-        for (int i = 0; i < 1000000; i++) {
-            asm("nop");
-        }
+	delay(1000000);
         LED_BLUE_OFF;
+        delay(1000000);
+        LED_BLUE_ON;
+        delay(1000000);
+	LED_BLUE_OFF;
+	delay(2000000); // wait for 2 sec before new lettevr
+ 	// send O - that is 3 long:
+        LED_BLUE_ON;
+        delay(3000000);
+        LED_BLUE_OFF;
+        delay(1000000);
+        LED_BLUE_ON;
+        delay(3000000);
+        LED_BLUE_OFF;
+        delay(1000000);
+        LED_BLUE_ON;
+        delay(3000000);
+        LED_BLUE_OFF;
+        delay(2000000); // wait for 2 sec before new lettevr
+	// send S - that is 3 shors:
+        LED_BLUE_ON;
+        delay(1000000);
+        LED_BLUE_OFF;
+        delay(1000000);
+        LED_BLUE_ON;
+        delay(1000000);
+        LED_BLUE_OFF;
+        delay(1000000);
+        LED_BLUE_ON;
+        delay(1000000);
+        LED_BLUE_OFF;
+        delay(2000000); // wait for 2 sec before new lettevr
+	// wait 5 more seconds to put new SOS
+	delay(5000000);
     }
 }
 
+void delay(uint32_t microseconds){
+    /* perform busy-waiting for specified number of microseconds  */
+    uint32_t cycles = microseconds * 2; // factor has been found by measure
+    for (int i = 0; i < cycles; i++) {
+        asm("nop");
+    }
+
+}
 
 /**
  * @brief Initialize the boards on-board RGB LED
