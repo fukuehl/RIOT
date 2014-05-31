@@ -20,6 +20,7 @@
 
 #include "board.h"
 #include "nrf51.h"
+#include "nrf51_bitfields.h"
 
 extern void SystemInit(void);
 void leds_init(void);
@@ -27,6 +28,8 @@ void leds_init(void);
 
 void board_init(void)
 {
+	int receiveUART;
+	char * receiveUARTchar;
     /* initialize core clocks via STM-lib given function */
     SystemInit();
 
@@ -39,12 +42,17 @@ void board_init(void)
     /* blink stuff */
     while (1) {
 
+    	receiveUART = uart_read_blocking(UART_0,receiveUARTchar);
+        uart_write_blocking(UART_0, receiveUART);
+        uart_write_blocking(UART_0,receiveUARTchar);
+
         for (int i = 0; i < 1000000; i++) {
             asm("nop");
         }
         LED_RED_OFF;
         LED_GREEN_OFF;
         LED_BLUE_OFF;
+
         for (int i = 0; i < 1000000; i++) {
             asm("nop");
         }
