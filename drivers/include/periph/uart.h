@@ -22,7 +22,6 @@
 #include <stdint.h>
 
 #include "periph_conf.h"
-#include "nrf51_bitfields.h"
 
 
 /**

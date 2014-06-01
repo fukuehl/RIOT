@@ -27,6 +27,7 @@
 #include "board.h"
 #include "pca10000.h"
 #include "nrf_gpio.h"
+#include "nrf51_bitfields.h"
 
 
 /**
@@ -220,12 +221,6 @@ int uart_write(uart_t uart, char data)
     switch (uart) {
         case UART_0:
         	  NRF_UART0->TXD = (uint8_t)data;
-
-        	  while (NRF_UART0->EVENTS_TXDRDY!=1)
-        	  {
-        	    // Wait for TXD data to be sent
-        	  }
-
         	  NRF_UART0->EVENTS_TXDRDY=0;
             break;
         case UART_UNDEFINED:
@@ -260,18 +255,23 @@ int uart_read_blocking(uart_t uart, char *data)
 int uart_write_blocking(uart_t uart, char data)
 {	/*copy from cpu/sam3x8e/periph/uart.c*/
 	//TODO adjust Registers
-	//TODO string or char?
+	//Using:
+	 /* while (ch != '\0')
+	  {
+	    uart_write_blocking(uart, ch);
+	    ch = data[i++];
+	  }*/
     switch (uart) {
         case UART_0:
-            //while (!(UART_0_DEV->UART_SR & UART_SR_TXRDY));
-            //UART_0_DEV->UART_THR = data;
-        	  uint_fast8_t i = 0;
-        	  uint8_t ch = data[i++];
-        	  while (ch != '\0')
-        	  {
-        	    uart_write(uart, ch);
-        	    ch = data[i++];
-        	  }
+      	  NRF_UART0->TXD = (uint8_t)data;
+
+      	  while (NRF_UART0->EVENTS_TXDRDY!=1)
+      	  {
+      	    // Wait for TXD data to be sent
+      	  }
+
+      	  NRF_UART0->EVENTS_TXDRDY=0;
+
             break;
         case UART_UNDEFINED:
             return -1;
