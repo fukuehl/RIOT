@@ -29,8 +29,8 @@ void leds_init(void);
 void board_init(void)
 {
 	int receivedUART;
-	char * receivedUARTstring;
-	char charUART;
+	char * receivedUARTstring = "\0";
+	char charUART = '\0';
 	int i = 0;
     /* initialize core clocks via STM-lib given function */
     SystemInit();
@@ -41,19 +41,31 @@ void board_init(void)
     /* initialize the boards LEDs */
     leds_init();
 
+    /*initialize UART */
+    uart_init_blocking(0, 38400); //UART_0 aus uart.h eigentlich
+
+    char* output = "Hello World!";
+    char outputchar = output[i];
+	while ( outputchar != '\0')
+	{
+		uart_write_blocking(0, outputchar);
+		outputchar = output[i++];
+	}
+
+
     /* blink stuff */
     while (1) {
 
-    	receivedUART = uart_read_blocking(0,receivedUARTstring);
-    	if(receivedUART){
-    		charUART = receivedUARTstring[i++];
-       	 while (charUART != '\0')
-       	  {
-       	    uart_write_blocking(0, charUART);
-       	    charUART = receivedUARTstring[i++];
-       	  }
-       	 i=0;
-    	}
+//    	receivedUART = uart_read_blocking(0,receivedUARTstring);
+//    	if(receivedUART){
+//    		charUART = receivedUARTstring[i++];
+//    		while (charUART != '\0')
+//    		{
+//    			uart_write_blocking(0, charUART);
+//    			charUART = receivedUARTstring[i++];
+//    		}
+//       	 i=0;
+//    	}
 
 
         for (int i = 0; i < 1000000; i++) {
@@ -86,7 +98,18 @@ void board_init(void)
         for (int i = 0; i < 1000000; i++) {
             asm("nop");
         }
+        LED_RED_OFF;
+        LED_GREEN_OFF;
         LED_BLUE_OFF;
+        for (int i = 0; i < 1000000; i++) {
+            asm("nop");
+        }
+        LED_GREEN_ON;
+        LED_BLUE_ON;
+        LED_RED_ON;
+        for (int i = 0; i < 1000000; i++) {
+            asm("nop");
+        }
     }
 }
 
