@@ -44,28 +44,30 @@ void board_init(void)
     /*initialize UART */
     uart_init_blocking(0, 38400); //UART_0 aus uart.h eigentlich
 
-    char* output = "Hello World!";
-    char outputchar = output[i];
+    char* output = "Hello World!\r\n";
+    char outputchar = output[i++];
 	while ( outputchar != '\0')
 	{
 		uart_write_blocking(0, outputchar);
 		outputchar = output[i++];
 	}
+	i = 0;
 
 
     /* blink stuff */
     while (1) {
-
-//    	receivedUART = uart_read_blocking(0,receivedUARTstring);
-//    	if(receivedUART){
-//    		charUART = receivedUARTstring[i++];
-//    		while (charUART != '\0')
-//    		{
-//    			uart_write_blocking(0, charUART);
-//    			charUART = receivedUARTstring[i++];
-//    		}
-//       	 i=0;
-//    	}
+    	uart_write_blocking(0, 'w');
+    	receivedUART = uart_read_blocking(0,receivedUARTstring);
+    	if(receivedUART){
+    		charUART = receivedUARTstring[i++];
+    		uart_write_blocking(0, 'm');
+    		while (charUART != '\0')
+    		{
+    			uart_write_blocking(0, 'm');//charUART);
+    			charUART = receivedUARTstring[i++];
+    		}
+       	 i=0;
+    	}
 
 
         for (int i = 0; i < 1000000; i++) {
@@ -74,11 +76,13 @@ void board_init(void)
         LED_RED_OFF;
         LED_GREEN_OFF;
         LED_BLUE_OFF;
+        uart_write_blocking(0, 'O');
 
         for (int i = 0; i < 1000000; i++) {
             asm("nop");
         }
         LED_RED_ON;
+        uart_write_blocking(0, 'R');
         for (int i = 0; i < 1000000; i++) {
             asm("nop");
         }
@@ -87,6 +91,7 @@ void board_init(void)
             asm("nop");
         }
         LED_GREEN_ON;
+        uart_write_blocking(0, 'G');
         for (int i = 0; i < 1000000; i++) {
             asm("nop");
         }
@@ -95,6 +100,7 @@ void board_init(void)
             asm("nop");
         }
         LED_BLUE_ON;
+        uart_write_blocking(0, 'B');
         for (int i = 0; i < 1000000; i++) {
             asm("nop");
         }
@@ -107,6 +113,7 @@ void board_init(void)
         LED_GREEN_ON;
         LED_BLUE_ON;
         LED_RED_ON;
+        uart_write_blocking(0, 'A');
         for (int i = 0; i < 1000000; i++) {
             asm("nop");
         }

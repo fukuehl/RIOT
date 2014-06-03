@@ -55,37 +55,10 @@ int uart_init(uart_t uart, uint32_t baudrate, void (*rx_cb)(char), void (*tx_cb)
    }
 
     return 0;
-
-      /* copy from sam3xbe
-       *
-       *
-     // initialize basic functionality
-    int res = uart_init_blocking(uart, baudrate);
-    if (res != 0) {
-        return res;
-    }
-
-    // register callbacks
-    config[uart].rx_cb = rx_cb;
-    config[uart].tx_cb = tx_cb;
-
-    // configure interrupts and enable RX interrupt
-    switch (uart) {
-        case UART_0:
-            UART_0_DEV->UART_IER = UART_IER_RXRDY;
-        break;
-        case UART_UNDEFINED:
-            return -2;
-    }
-    return 0;
-       */
 }
 
 int uart_init_blocking(uart_t uart, uint32_t baudrate)
 {
-/*hier anfangen Register beschreiben und clocks etc 115200 standard baudrate Arduino DUO code abgleichen*/
-//copy from cpu     sam3x8e
-    uint16_t clock_divider = F_CPU / (16 * baudrate);
     int baudrate_real;
     switch(baudrate) {
     case 1200 :
@@ -152,8 +125,8 @@ int uart_init_blocking(uart_t uart, uint32_t baudrate)
             NRF_UART0->PSELTXD = TX_PIN_NUMBER;
             NRF_UART0->PSELRXD = RX_PIN_NUMBER;
 
-            NRF_UART0->PSELCTS = CTS_PIN_NUMBER;
-            NRF_UART0->PSELRTS = RTS_PIN_NUMBER;
+            //NRF_UART0->PSELCTS = CTS_PIN_NUMBER;
+            //NRF_UART0->PSELRTS = RTS_PIN_NUMBER;
             NRF_UART0->CONFIG  = (UART_CONFIG_HWFC_Enabled << UART_CONFIG_HWFC_Pos);
 
 
@@ -163,13 +136,6 @@ int uart_init_blocking(uart_t uart, uint32_t baudrate)
             NRF_UART0->TASKS_STARTRX    = 1;
             NRF_UART0->EVENTS_RXDRDY    = 0;
 
-
-            /* set clock divider */
-           // UART_0_DEV->UART_BRGR = clock_divider;
-            /* set to normal mode without parity */
-           // UART_0_DEV->UART_MR = UART_MR_PAR_NO | UART_MR_CHMODE_NORMAL;
-            /* enable receiver and transmitter and reset status bits */
-           // UART_0_DEV->UART_CR = UART_CR_RXEN | UART_CR_TXEN | UART_CR_RSTSTA;
             break;
 #endif
         case UART_UNDEFINED:
@@ -177,36 +143,7 @@ int uart_init_blocking(uart_t uart, uint32_t baudrate)
             break;
     }
     return 0;
-    //copy from simple_uart.c SDK
-    /** @snippet [Configure UART RX and TX pin] */
 
-    /* uint8_t rts_pin_number,
-                             uint8_t txd_pin_number,
-                             uint8_t cts_pin_number,
-                             uint8_t rxd_pin_number,
-                             bool    hwfc /*
-
-      nrf_gpio_cfg_output(txd_pin_number);
-      nrf_gpio_cfg_input(rxd_pin_number, NRF_GPIO_PIN_NOPULL);
-
-      NRF_UART0->PSELTXD = txd_pin_number;
-      NRF_UART0->PSELRXD = rxd_pin_number;
-    /** @snippet [Configure UART RX and TX pin] */
-    /*
-      if (hwfc)
-      {
-        nrf_gpio_cfg_output(rts_pin_number);
-        nrf_gpio_cfg_input(cts_pin_number, NRF_GPIO_PIN_NOPULL);
-        NRF_UART0->PSELCTS = cts_pin_number;
-        NRF_UART0->PSELRTS = rts_pin_number;
-        NRF_UART0->CONFIG  = (UART_CONFIG_HWFC_Enabled << UART_CONFIG_HWFC_Pos);
-      }
-
-      NRF_UART0->BAUDRATE         = (UART_BAUDRATE_BAUDRATE_Baud38400 << UART_BAUDRATE_BAUDRATE_Pos);
-      NRF_UART0->ENABLE           = (UART_ENABLE_ENABLE_Enabled << UART_ENABLE_ENABLE_Pos);
-      NRF_UART0->TASKS_STARTTX    = 1;
-      NRF_UART0->TASKS_STARTRX    = 1;
-      NRF_UART0->EVENTS_RXDRDY    = 0;
 }
 
 
@@ -246,11 +183,7 @@ int uart_read_blocking(uart_t uart, char *data)
         	  }
 
         	  NRF_UART0->EVENTS_RXDRDY = 0;
-        	  *data = (char)NRF_UART0->RXD;
-        	  return (uint8_t)NRF_UART0->RXD;
-
-            //while (!(UART_0_DEV->UART_SR & UART_SR_RXRDY));
-            //*data = (char)UART_0_DEV->UART_RHR;
+        	  *data = (uint8_t)NRF_UART0->RXD;
             break;
         case UART_UNDEFINED:
             return -1;
