@@ -13,7 +13,7 @@ export LINK = $(PREFIX)gcc
 export SIZE = $(PREFIX)size
 export OBJCOPY = $(PREFIX)objcopy
 export TERMPROG = $(RIOTBASE)/dist/tools/pyterm/pyterm.py
-export FLASHER = JLinkExe
+export FLASHER = JLinkExe < /tmp/burn.seg
 
 # define build specific options
 export CPU_USAGE = -mcpu=cortex-m0
@@ -25,7 +25,8 @@ export LINKFLAGS = -g3 -ggdb -std=gnu99 $(CPU_USAGE) $(FPU_USAGE) -mlittle-endia
 export LINKFLAGS += -T$(LINKERSCRIPT)                                   # linkerscript specified in cpu/Makefile.include
 #export LINKFLAGS += -specs=nano.specs -lc -lnosys                       # additional linker flags to enable newlib-nano
 export OFLAGS = -O binary
-export FFLAGS = -device nrf51822_xxAA -if swd -speed 1000
+#export FFLAGS = -device nrf51822_xxAA -if swd -speed 1000
+#export FFLAGS ?=  x
 
 
 # export board specific includes to the global includes-listing

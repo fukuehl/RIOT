@@ -135,6 +135,14 @@ clean:
 	rm -rf $(BINDIR) $(CLEANFILES)
 
 flash: all
+	echo "device nrf51822" > /tmp/burn.seg
+	echo "speed 1000" >> /tmp/burn.seg
+	echo "w4 4001e504 1" >> /tmp/burn.seg
+	echo "loadbin $(RIOTBASE)/examples/$(APPLICATION)/bin/$(BOARD)/$(APPLICATION).bin 0" >> /tmp/burn.seg
+	echo "r" >> /tmp/burn.seg
+	echo "g" >> /tmp/burn.seg
+	echo "exit" >> /tmp/burn.seg
+	echo "" >> /tmp/burn.seg
 	$(FLASHER) $(FFLAGS)
 
 term:
