@@ -19,8 +19,9 @@
  */
 
 #include "board.h"
-#include <nrf51.h>
+#include "nrf51.h"
 #include "nrf_delay.h"
+#include "nrf51_bitfields.h"
 
 extern void SystemInit(void);
 void leds_init(void);
@@ -28,6 +29,10 @@ void leds_init(void);
 
 void board_init(void)
 {
+	int receivedUART;
+	char * receivedUARTstring = "\0";
+	char charUART = '\0';
+	int i = 0;
     /* initialize core clocks via STM-lib given function */
     SystemInit();
 
@@ -36,6 +41,19 @@ void board_init(void)
 
     /* initialize the boards LEDs */
     leds_init();
+
+    /*initialize UART */
+    uart_init_blocking(0, 38400); //UART_0 aus uart.h eigentlich
+
+    char* output = "Hello World!\r\n";
+    char outputchar = output[i++];
+	while ( outputchar != '\0')
+	{
+		uart_write_blocking(0, outputchar);
+		outputchar = output[i++];
+	}
+	i = 0;
+
 
     /* blink stuff */
     LED_RED_OFF;
@@ -58,6 +76,18 @@ void board_init(void)
     	nrf_delay_ms(500);
     	LED_GREEN_ON;
     	nrf_delay_ms(500);
+    	uart_write_blocking(0, 'w');
+    	receivedUART = uart_read_blocking(0,receivedUARTstring);
+    	if(receivedUART){
+    		charUART = receivedUARTstring[i++];
+    		uart_write_blocking(0, 'm');
+    		while (charUART != '\0')
+    		{
+    			uart_write_blocking(0, 'm');//charUART);
+    			charUART = receivedUARTstring[i++];
+    		}
+       	 i=0;
+    	}
     }
 }
 

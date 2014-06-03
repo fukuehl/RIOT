@@ -1,3 +1,6 @@
+FLASHER = echo "Ich bin der Flasher!!"
+
+
 ifeq (, $(__RIOTBUILD_FLAG))
   all: welcome
 	@echo ""
