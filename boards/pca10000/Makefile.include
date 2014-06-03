@@ -17,7 +17,8 @@ export FLASHER = JLinkExe < /tmp/burn.seg
 
 # define build specific options
 export CPU_USAGE = -mcpu=cortex-m0
-export CFLAGS = -ggdb -g3 -std=gnu99 -Os -Wall -Wstrict-prototypes $(CPU_USAGE) -mlittle-endian -mthumb -mthumb-interwork -nostartfiles
+#-Os optimized for size
+export CFLAGS = -ggdb -g3 -std=gnu99 -O0 -Wall -Wstrict-prototypes $(CPU_USAGE) -mlittle-endian -mthumb -mthumb-interwork -nostartfiles
 export CFLAGS += -DREENTRANT_SYSCALLS_PROVIDED
 #export CFLAGS += -flto -ffunction-sections -fdata-sections -fno-builtin  # addiontal compiler flags to optimize compiling for newlib-nano
 export ASFLAGS = -ggdb -g3 -mcpu=cortex-m4 $(FPU_USAGE) -mlittle-endian

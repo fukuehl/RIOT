@@ -29,7 +29,6 @@ void leds_init(void);
 void board_init(void)
 {
 	int receivedUART;
-	char * receivedUARTstring = "\0";
 	char charUART = '\0';
 	int i = 0;
     /* initialize core clocks via STM-lib given function */
@@ -56,7 +55,7 @@ void board_init(void)
 
     /* blink stuff */
     while (1) {
-    	uart_write_blocking(0, 'w');
+    	/*uart_write_blocking(0, 'w');
     	receivedUART = uart_read_blocking(0,receivedUARTstring);
     	if(receivedUART){
     		charUART = receivedUARTstring[i++];
@@ -67,7 +66,13 @@ void board_init(void)
     			charUART = receivedUARTstring[i++];
     		}
        	 i=0;
-    	}
+    	}*/
+
+    	uart_write_blocking(0, 'w');
+		while(uart_read_blocking(0,&charUART))  {
+
+				uart_write_blocking(0, charUART);
+		}
 
 
         for (int i = 0; i < 1000000; i++) {

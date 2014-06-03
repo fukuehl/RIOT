@@ -182,8 +182,10 @@ int uart_read_blocking(uart_t uart, char *data)
         	    // Wait for RXD data to be received
         	  }
 
+        	  //strcpy(data, NRF_UART0->RXD);
+        	  *data = (char) NRF_UART0->RXD;
         	  NRF_UART0->EVENTS_RXDRDY = 0;
-        	  *data = (uint8_t)NRF_UART0->RXD;
+        	  //*data = (char)NRF_UART0->RXD;
             break;
         case UART_UNDEFINED:
             return -1;
