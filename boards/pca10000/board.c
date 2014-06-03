@@ -19,7 +19,8 @@
  */
 
 #include "board.h"
-#include "nrf51.h"
+#include <nrf51.h>
+#include "nrf_delay.h"
 
 extern void SystemInit(void);
 void leds_init(void);
@@ -37,55 +38,26 @@ void board_init(void)
     leds_init();
 
     /* blink stuff */
-    while (1) {
-        LED_RED_OFF;
-        LED_GREEN_OFF;
-        LED_BLUE_OFF;
-        delay(1000000);
-	LED_RED_ON; // let green and red also shine
-        LED_GREEN_ON; // just in case blue is not connected
-        // send SOS via morse :):
-	// send S - that is 3 shors:
-	LED_BLUE_ON;
-        delay(1000000);
-        LED_BLUE_OFF;
-	delay(1000000);
-        LED_BLUE_ON;
-	delay(1000000);
-        LED_BLUE_OFF;
-        delay(1000000);
-        LED_BLUE_ON;
-        delay(1000000);
-	LED_BLUE_OFF;
-	delay(2000000); // wait for 2 sec before new lettevr
- 	// send O - that is 3 long:
-        LED_BLUE_ON;
-        delay(3000000);
-        LED_BLUE_OFF;
-        delay(1000000);
-        LED_BLUE_ON;
-        delay(3000000);
-        LED_BLUE_OFF;
-        delay(1000000);
-        LED_BLUE_ON;
-        delay(3000000);
-        LED_BLUE_OFF;
-        delay(2000000); // wait for 2 sec before new lettevr
-	// send S - that is 3 shors:
-        LED_BLUE_ON;
-        delay(1000000);
-        LED_BLUE_OFF;
-        delay(1000000);
-        LED_BLUE_ON;
-        delay(1000000);
-        LED_BLUE_OFF;
-        delay(1000000);
-        LED_BLUE_ON;
-        delay(1000000);
-        LED_BLUE_OFF;
-        delay(2000000); // wait for 2 sec before new lettevr
-	// wait 5 more seconds to put new SOS
-	delay(5000000);
+    LED_RED_OFF;
+    LED_GREEN_OFF;
+    LED_BLUE_OFF;
+
+    nrf_delay_ms(1000);
+    nrf_delay_ms(1000);
+    LED_RED_ON;  
+    nrf_delay_ms(1000);
+    LED_GREEN_ON;
+    nrf_delay_ms(1000);
+    LED_BLUE_ON;
+    nrf_delay_ms(1000);
+    LED_RED_OFF;
+    LED_GREEN_OFF;
+    LED_BLUE_OFF;
+    while(1){
+    	LED_GREEN_OFF;
+    	nrf_delay_ms(500);
+    	LED_GREEN_ON;
+    	nrf_delay_ms(500);
     }
 }
 
