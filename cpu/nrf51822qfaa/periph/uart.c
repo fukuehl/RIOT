@@ -146,6 +146,12 @@ int uart_init_blocking(uart_t uart, uint32_t baudrate)
             nrf_gpio_cfg_output(RTS_PIN_NUMBER);
             nrf_gpio_cfg_input(CTS_PIN_NUMBER, NRF_GPIO_PIN_NOPULL);
 
+            nrf_gpio_cfg_output(RTS_PIN_NUMBER);
+            nrf_gpio_cfg_input(CTS_PIN_NUMBER, NRF_GPIO_PIN_NOPULL);
+
+            NRF_UART0->PSELTXD = TX_PIN_NUMBER;
+            NRF_UART0->PSELRXD = RX_PIN_NUMBER;
+
             NRF_UART0->PSELCTS = CTS_PIN_NUMBER;
             NRF_UART0->PSELRTS = RTS_PIN_NUMBER;
             NRF_UART0->CONFIG  = (UART_CONFIG_HWFC_Enabled << UART_CONFIG_HWFC_Pos);
