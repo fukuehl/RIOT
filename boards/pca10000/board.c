@@ -55,22 +55,9 @@ void board_init(void)
 
     /* blink stuff */
     while (1) {
-    	/*uart_write_blocking(0, 'w');
-    	receivedUART = uart_read_blocking(0,receivedUARTstring);
-    	if(receivedUART){
-    		charUART = receivedUARTstring[i++];
-    		uart_write_blocking(0, 'm');
-    		while (charUART != '\0')
-    		{
-    			uart_write_blocking(0, 'm');//charUART);
-    			charUART = receivedUARTstring[i++];
-    		}
-       	 i=0;
-    	}*/
 
-    	uart_write_blocking(0, 'w');
+
 		while(uart_read_blocking(0,&charUART))  {
-
 				uart_write_blocking(0, charUART);
 		}
 
@@ -122,6 +109,7 @@ void board_init(void)
         for (int i = 0; i < 1000000; i++) {
             asm("nop");
         }
+
     }
 }
 

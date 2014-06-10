@@ -186,6 +186,9 @@ int uart_read_blocking(uart_t uart, char *data)
         	  *data = (char) NRF_UART0->RXD;
         	  NRF_UART0->EVENTS_RXDRDY = 0;
         	  //*data = (char)NRF_UART0->RXD;
+
+
+
             break;
         case UART_UNDEFINED:
             return -1;
