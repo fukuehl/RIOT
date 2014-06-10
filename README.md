@@ -26,23 +26,22 @@
 
 The friendly Operating System for IoT!
 
+We are forking for nordic nrf51822 plattform. This module uses ARM Cortex-M0 CPU and includes a bluetooth low energy (BLE) unit. Our goal is to port RIOT to this specific M0 plattform and add BLE support. For this purpose we are hacking to be able to send and receive messages over BLE (successfull "ping pong" test).
+
 ## FEATURES
 RIOT OS is an operating system for Internet of Things (IoT) devices. It is based on a microkernel and designed for
 * energy efficiency
 * hardware independent development
 * a high degree of modularity
 
-Its features comprise
-* a preemptive, tickless scheduler with priorities
-* flexible memory management
-* high resolution timers
-* virtual, long-term timers
-* the native port allows to run RIOT as-is on Linux, BSD, and MacOS. Multiple instances of RIOT running on a single machine can also be interconnected via a simple virtual Ethernet bridge
-* Wiselib support (C++ algorithm library, including routing, clustering, timesync, localization, security and more algorithms)
-* IPv6
-* TCP and UDP
-* 6LoWPAN
-* RPL
+Features in this particular branch comprise
+* a preemptive, tickless scheduler with priorities (TODO porting)
+* flexible memory management  (TODO porting)
+* communication over UART (TODO)
+* Timers (TODO)
+ * high resolution timers
+ * virtual, long-term timers
+* Bluetooth low energy (BLE) communication (TODO porting)
 
 ## GETTING STARTED
 * You want to start the RIOT? Just follow our [Getting started documentation](https://github.com/RIOT-OS/RIOT/wiki/Introduction)

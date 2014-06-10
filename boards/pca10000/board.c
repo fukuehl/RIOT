@@ -20,6 +20,7 @@
 
 #include "board.h"
 #include "nrf51.h"
+#include "nrf_delay.h"
 #include "nrf51_bitfields.h"
 
 extern void SystemInit(void);
@@ -54,6 +55,7 @@ void board_init(void)
 
 
     /* blink stuff */
+
     while (1) {
 
 
@@ -113,6 +115,14 @@ void board_init(void)
     }
 }
 
+void delay(uint32_t microseconds){
+    /* perform busy-waiting for specified number of microseconds  */
+    uint32_t cycles = microseconds * 2; // factor has been found by measure
+    for (int i = 0; i < cycles; i++) {
+        asm("nop");
+    }
+
+}
 
 /**
  * @brief Initialize the boards on-board RGB LED
