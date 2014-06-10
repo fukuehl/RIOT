@@ -20,6 +20,7 @@
 
 #include "board.h"
 #include "nrf51.h"
+#include "nrf_delay.h"
 #include "nrf51_bitfields.h"
 
 extern void SystemInit(void);
@@ -54,77 +55,43 @@ void board_init(void)
 
 
     /* blink stuff */
-    while (1) {
-    	/*uart_write_blocking(0, 'w');
-    	receivedUART = uart_read_blocking(0,receivedUARTstring);
-    	if(receivedUART){
-    		charUART = receivedUARTstring[i++];
-    		uart_write_blocking(0, 'm');
-    		while (charUART != '\0')
-    		{
-    			uart_write_blocking(0, 'm');//charUART);
-    			charUART = receivedUARTstring[i++];
-    		}
-       	 i=0;
-    	}*/
+    LED_RED_OFF;
+    LED_GREEN_OFF;
+    LED_BLUE_OFF;
 
+    nrf_delay_ms(1000);
+    nrf_delay_ms(1000);
+    LED_RED_ON;  
+    nrf_delay_ms(1000);
+    LED_GREEN_ON;
+    nrf_delay_ms(1000);
+    LED_BLUE_ON;
+    nrf_delay_ms(1000);
+    LED_RED_OFF;
+    LED_GREEN_OFF;
+    LED_BLUE_OFF;
+    while(1){
+    	LED_GREEN_OFF;
+    	nrf_delay_ms(500);
+    	LED_GREEN_ON;
+    	nrf_delay_ms(500);
     	uart_write_blocking(0, 'w');
 		while(uart_read_blocking(0,&charUART))  {
 
 				uart_write_blocking(0, charUART);
 		}
-
-
-        for (int i = 0; i < 1000000; i++) {
-            asm("nop");
-        }
-        LED_RED_OFF;
-        LED_GREEN_OFF;
-        LED_BLUE_OFF;
-        uart_write_blocking(0, 'O');
-
-        for (int i = 0; i < 1000000; i++) {
-            asm("nop");
-        }
-        LED_RED_ON;
-        uart_write_blocking(0, 'R');
-        for (int i = 0; i < 1000000; i++) {
-            asm("nop");
-        }
-        LED_RED_OFF;
-        for (int i = 0; i < 1000000; i++) {
-            asm("nop");
-        }
-        LED_GREEN_ON;
-        uart_write_blocking(0, 'G');
-        for (int i = 0; i < 1000000; i++) {
-            asm("nop");
-        }
-        LED_GREEN_OFF;
-        for (int i = 0; i < 1000000; i++) {
-            asm("nop");
-        }
-        LED_BLUE_ON;
-        uart_write_blocking(0, 'B');
-        for (int i = 0; i < 1000000; i++) {
-            asm("nop");
-        }
-        LED_RED_OFF;
-        LED_GREEN_OFF;
-        LED_BLUE_OFF;
-        for (int i = 0; i < 1000000; i++) {
-            asm("nop");
-        }
-        LED_GREEN_ON;
-        LED_BLUE_ON;
-        LED_RED_ON;
-        uart_write_blocking(0, 'A');
-        for (int i = 0; i < 1000000; i++) {
-            asm("nop");
-        }
+    	}
     }
 }
 
+void delay(uint32_t microseconds){
+    /* perform busy-waiting for specified number of microseconds  */
+    uint32_t cycles = microseconds * 2; // factor has been found by measure
+    for (int i = 0; i < cycles; i++) {
+        asm("nop");
+    }
+
+}
 
 /**
  * @brief Initialize the boards on-board RGB LED

@@ -1,0 +1,41 @@
+Project Outline for ARM Cortex M0 and Nordic BLE
+================================================
+
+Nordic semiconductors created a module low energy bluetooth module nRF51822 (nRF BLE).
+In the starterkit version this module comes with an ARM cortex M0 board [2].
+The idea of using low energy bluetooth is very important to RIOT, because the IOT boards should use as less energy as possible and yet be able to communicate with other IOT boards.
+
+RIOT as the operating system for Internet of things is available on a variety of platforms [1]. Currently, support for ARM cortex M0 (with the stm-discovery-m0 board) is listed as in progress. We need to get in touch with the team and evaluate the current progress in porting to ARM cortex M0. 
+
+Once we have RIOT on the M0 board we need to get the bluetooth module running. First we will try to access and read registers from nRF BLE. As an important issue we plan to get two nRF BLE boards to exchange messages with each other. When still having time and resources, we will think about integration in a wireless sensor network (WSN). 
+
+List of task for the software project as part of the university course [3]:
+
+- Introduction (estimate 3 weeks, two week left)
+- - Read documents on Cortex M0 [4], nrf BLE [4] 
+- - Getting started with RIOT [5]
+- - install toolchain for building code for Cortex M0, getting started with buildroot [6]
+- Porting RIOT on Cortex M0 (estimate 4 weeks)
+- - recompile/ adjust RIOT modules for M0 
+- - Build cycle: add features, compile binaries, flash to board, check for errors
+- - Beeing able to use the Onboard LEDs
+- - Using the UART for Debugging
+- Add support for nRF BLE (4 weeks)
+- - Call and read nRF registers from ported Cortex M0 RIOT-modules
+- - Bluetooth-communication between two nRF BLE 
+- - Optional part to embedded into WSN
+- Documenting results (1 week)
+
+As we will work closely together (pair-programming, peer code-review) an assignment of task is not yet possible. 
+
+Regards,
+
+Christian, Timo and Adam
+
+
+[1] https://github.com/RIOT-OS/RIOT/wiki/RIOT-Platforms
+[2] https://www.nordicsemi.com/eng/Products/Bluetooth-R-low-energy/nRF51822-Development-Kit
+[3] http://www.mi.fu-berlin.de/inf/groups/ag-tech/teaching/2014_SS/P_19517g_SWP_Telematik/index.html
+[4] http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0497a/index.html
+[5] https://github.com/RIOT-OS/RIOT/wiki#wiki-start-the-riot
+[6] http://buildroot.org/docs.html
