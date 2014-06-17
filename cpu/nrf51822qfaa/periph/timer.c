@@ -19,6 +19,7 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "cpu.h"
 #include "board.h"

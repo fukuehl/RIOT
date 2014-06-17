@@ -18,7 +18,9 @@
  * @}
  */
 
+#include <stdio.h>
 #include "board.h"
+#include "cpu.h"
 #include "nrf51.h"
 #include "nrf_delay.h"
 #include "nrf51_bitfields.h"

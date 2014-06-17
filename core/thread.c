@@ -34,13 +34,12 @@
 
 inline int thread_getpid(void)
 {
-    return sched_active_thread->pid;
+    return active_thread->pid;
 }
 
 int thread_getlastpid(void)
 {
-    extern int thread_last_pid;
-    return thread_last_pid;
+    return last_pid;
 }
 
 int thread_getstatus(int pid)
@@ -68,7 +67,7 @@ void thread_sleep(void)
     }
 
     dINT();
-    sched_set_status((tcb_t *)sched_active_thread, STATUS_SLEEPING);
+    sched_set_status((tcb_t *)active_thread, STATUS_SLEEPING);
     eINT();
     thread_yield();
 }
@@ -86,7 +85,7 @@ int thread_wakeup(int pid)
         sched_set_status(other_thread, STATUS_RUNNING);
 
         restoreIRQ(old_state);
-        sched_switch(sched_active_thread->priority, other_thread->priority);
+        sched_switch(active_thread->priority, other_thread->priority);
 
         return 1;
     }
@@ -200,7 +199,7 @@ int thread_create(char *stack, int stacksize, char priority, int flags, void (*f
     cib_init(&(cb->msg_queue), 0);
     cb->msg_array = NULL;
 
-    sched_num_threads++;
+    num_tasks++;
 
     DEBUG("Created thread %s. PID: %u. Priority: %u.\n", name, cb->pid, priority);
 
@@ -221,7 +220,7 @@ int thread_create(char *stack, int stacksize, char priority, int flags, void (*f
         }
     }
 
-    if (!inISR() && sched_active_thread != NULL) {
+    if (!inISR() && active_thread != NULL) {
         eINT();
     }
 

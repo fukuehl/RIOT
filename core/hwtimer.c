@@ -202,8 +202,7 @@ int hwtimer_set_absolute(unsigned long offset, void (*callback)(void*), void *pt
 int hwtimer_remove(int n)
 {
     DEBUG("hwtimer_remove n=%d\n", n);
-
-    int state = disableIRQ();
+    hwtimer_arch_disable_interrupt();
     hwtimer_arch_unset(n);
 
     lifo_insert(lifo, n);
@@ -211,7 +210,6 @@ int hwtimer_remove(int n)
 
     lpm_prevent_sleep--;
 
-    restoreIRQ(state);
-
+    hwtimer_arch_enable_interrupt();
     return 1;
 }
