@@ -3,13 +3,10 @@
 export CFLAGS += -DCOREIF_NG=1
 
 # TODO remove this!
-export CFLAGS += -DCORTEX_M0
+# export CFLAGS += -DCORTEX_M0
 
 # tell the build system that the CPU depends on the Cortex-M common files
 export USEMODULE += cortexm_common
-# export the peripheral drivers to be linked into the final binary
-export USEMODULE += periph
-
 # define path to cortex-m common module, which is needed for this CPU
 export CORTEX_COMMON = $(RIOTCPU)/cortexm_common/
 
@@ -22,6 +19,10 @@ export INCLUDES += -I$(RIOTCPU)/$(CPU)/include
 # add the CPU specific system calls implementations for the linker
 export UNDEF += $(BINDIR)cpu/syscalls.o
 export UNDEF += $(BINDIR)cpu/startup.o
+
+# export the peripheral drivers to be linked into the final binary
+
+export USEMODULE += periph
 
 # CPU depends on the cortex-m common module, so include it
 include $(CORTEX_COMMON)Makefile.include

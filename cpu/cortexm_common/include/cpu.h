@@ -7,7 +7,9 @@
  */
 
 /**
- * @addtogroup  cpu_cortexm
+ * @defgroup    cpu_cortexm_common ARM Cortex-M common files
+ * @ingroup     cpu
+ * @brief       Common implementations and headers for Cortex-M family based micro-controllers
  * @{
  *
  * @file        cpu.h
