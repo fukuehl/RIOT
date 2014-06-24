@@ -113,7 +113,8 @@ char *thread_arch_stack_init(void  (*task_func)(void), void *stack_start, int st
 void thread_arch_stack_print(void)
 {
     int count = 0;
-    uint32_t *sp = (uint32_t *)sched_active_thread->sp;
+    /*uint32_t *sp = (uint32_t *)sched_active_thread->sp; */
+    uint32_t *sp = (uint32_t *)active_thread->sp;
 
     printf("printing the current stack of thread %u\n", thread_getpid());
     printf("  address:      data:\n");
@@ -195,7 +196,8 @@ __attribute__((always_inline)) static __INLINE void context_save(void)
     asm("mov    r0, sp");
     asm("mov    sp, r12");
     /* store the new psp to the tcb->sp */
-    asm("ldr    r1, =sched_active_thread"   );
+    /*asm("ldr    r1, =sched_active_thread"   ); */
+    asm("ldr    r1, =active_thread"   );
     asm("ldr    r1, [r1]");
     asm("str    r0, [r1]");
 }
@@ -205,7 +207,8 @@ __attribute__((always_inline)) static __INLINE void context_restore(void)
     /* save MSR stack pointer for later restore */
     asm("mov    lr, sp");
     /* get the PSP stack pointer of the current thread */
-    asm("ldr    r0, =sched_active_thread");
+    asm("ldr    r0, =active_thread");
+    /*asm("ldr    r0, =sched_active_thread"); */
     asm("ldr    r0, [r0]");
     asm("ldr    r0, [r0]");
     asm("mov    sp, r0");

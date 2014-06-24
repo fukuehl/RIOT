@@ -24,6 +24,7 @@
 #include "nrf51.h"
 #include "nrf_delay.h"
 #include "nrf51_bitfields.h"
+#include "periph/uart.h"
 
 extern void SystemInit(void);
 void leds_init(void);
@@ -31,7 +32,6 @@ void leds_init(void);
 
 void board_init(void)
 {
-	int receivedUART;
 	char charUART = '\0';
 	int i = 0;
     /* initialize core clocks via STM-lib given function */
@@ -44,8 +44,8 @@ void board_init(void)
     leds_init();
 
     /*initialize UART */
-    uart_init_blocking(0, 38400); //UART_0 aus uart.h eigentlich
-
+    uart_init_blocking(0, 115200);
+    /*uart_init_blocking(UART_0,115200);*/
     char* output = "Hello World!\r\n";
     char outputchar = output[i++];
 	while ( outputchar != '\0')

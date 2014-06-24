@@ -6,9 +6,9 @@ export CFLAGS += -DCOREIF_NG=1
 # export CFLAGS += -DCORTEX_M0
 
 # tell the build system that the CPU depends on the Cortex-M common files
-export USEMODULE += cortexm_common
+export USEMODULE += cortex-m0_common
 # define path to cortex-m common module, which is needed for this CPU
-export CORTEX_COMMON = $(RIOTCPU)/cortexm_common/
+export CORTEX_COMMON = $(RIOTCPU)/cortex-m0_common/
 
 # define the linker script to use for this CPU
 export LINKERSCRIPT = $(RIOTCPU)/$(CPU)/nrf51822qfaa_linkerscript.ld
