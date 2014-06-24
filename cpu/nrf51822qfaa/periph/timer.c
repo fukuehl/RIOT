@@ -46,6 +46,18 @@ timer_conf_t config[TIMER_NUMOF];
 int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int)) {
 
 	volatile NRF_TIMER_Type * p_timer;
+
+    // Start 16 MHz crystal oscillator.
+    NRF_CLOCK->EVENTS_HFCLKSTARTED  = 0;
+    NRF_CLOCK->TASKS_HFCLKSTART     = 1;
+
+    // Wait for the external oscillator to start up.
+    while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0)
+    {
+        // Do nothing.
+    }
+
+
 	switch (dev) {
 
 #if TIMER_0_EN
@@ -262,16 +274,19 @@ void timer_stop(tim_t dev) {
 #if TIMER_0_EN
         case TIMER_0:
             NRF_TIMER0->TASKS_STOP = 1;
+            NRF_TIMER0->TASKS_SHUTDOWN = 1;
             break;
 #endif
 #if TIMER_1_EN
         case TIMER_1:
         	NRF_TIMER1->TASKS_STOP = 1;
+        	NRF_TIMER1->TASKS_SHUTDOWN = 1;
             break;
 #endif
 #if TIMER_2_EN
         case TIMER_2:
         	NRF_TIMER2->TASKS_STOP = 1;
+        	NRF_TIMER2->TASKS_SHUTDOWN = 1;
             break;
 #endif
         case TIMER_UNDEFINED:
