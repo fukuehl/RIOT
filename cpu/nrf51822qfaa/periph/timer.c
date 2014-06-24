@@ -51,18 +51,24 @@ int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int)) {
 #if TIMER_0_EN
 	case (TIMER_0):
 		p_timer = NRF_TIMER0;
+		NVIC_SetPriority(TIMER0_IRQn, 1);
+		NVIC_EnableIRQ(TIMER0_IRQn);
 		break;
 #endif
 
 #if TIMER_1_EN
 	case (TIMER_1):
 		p_timer = NRF_TIMER1;
+		NVIC_SetPriority(TIMER1_IRQn, 1);
+		NVIC_EnableIRQ(TIMER1_IRQn);
 		break;
 #endif
 
 #if TIMER_2_EN
 	case (TIMER_2):
 		p_timer = NRF_TIMER2;
+		NVIC_SetPriority(TIMER2_IRQn, 1);
+		NVIC_EnableIRQ(TIMER2_IRQn);
 		break;
 #endif
 
@@ -76,24 +82,25 @@ int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int)) {
 
 	switch (ticks_per_us) {
 		case 1:
-			p_timer->PRESCALER = 32;
+			p_timer->PRESCALER = 0;
 			break;
 		case 2:
-			p_timer->PRESCALER = 16;
-			break;
-		case 3:
-			p_timer->PRESCALER = 8;
+			p_timer->PRESCALER = 1;
 			break;
 		case 4:
-			p_timer->PRESCALER = 4;
-			break;
-		case 5:
 			p_timer->PRESCALER = 2;
+			break;
+		case 8:
+			p_timer->PRESCALER = 3;
+			break;
+		case 16:
+			p_timer->PRESCALER = 4;
 			break;
 
 		default:
 			break;
 	}
+	p_timer->TASKS_START = 1;
 
 
 	return 1;
@@ -130,24 +137,27 @@ int timer_set(tim_t dev, int channel, unsigned int timeout) {
 	switch (channel) {
 		case 0:
 			p_timer->CC[0] = timeout;
+			p_timer->INTENSET |= TIMER_INTENSET_COMPARE0_Msk;
 
 			break;
 		case 1:
 			p_timer->CC[1] = timeout;
+			p_timer->INTENSET |= TIMER_INTENSET_COMPARE1_Msk;
 
 			break;
 		case 2:
 			p_timer->CC[2] = timeout;
+			p_timer->INTENSET |= TIMER_INTENSET_COMPARE2_Msk;
 
 			break;
 		case 3:
 			p_timer->CC[3] = timeout;
+			p_timer->INTENSET |= TIMER_INTENSET_COMPARE3_Msk;
 
 			break;
 		default:
 			break;
 	}
-
 	return 1;
 }
 
@@ -176,6 +186,8 @@ int timer_clear(tim_t dev, int channel) {
 #endif
 
 	}
+
+	p_timer->TASKS_CLEAR = 1;
 
 	/* set timeout value */
 
@@ -311,6 +323,39 @@ void timer_irq_disable(tim_t dev) {
     }
 }
 
-void timer_reset(tim_t dev) {
+void timer_reset(tim_t dev)
+{
 	/* TODO */
+}
+
+void isr_timer0(void)
+{
+	//TODO INterrupt prüfen warum wurde ich aufgerufen, entsprechend für andere events
+
+	for(int i = 0; i<4; i++){
+		if(NRF_TIMER0->EVENTS_COMPARE[i] == 1){
+			config[0].cb(i);
+			NRF_TIMER0->INTENCLR &= ~TIMER_INTENCLR_COMPARE0_Msk;
+		}
+	}
+}
+
+void isr_timer1(void)
+{
+	for(int i = 0; i<4; i++){
+		if(NRF_TIMER1->EVENTS_COMPARE[i] == 1){
+			config[1].cb(i);
+			NRF_TIMER1->INTENCLR &= ~TIMER_INTENCLR_COMPARE1_Msk;
+		}
+	}
+}
+
+void isr_timer2(void)
+{
+	for(int i = 0; i<4; i++){
+		if(NRF_TIMER2->EVENTS_COMPARE[i] == 1){
+			config[2].cb(i);
+			NRF_TIMER2->INTENCLR &= ~TIMER_INTENCLR_COMPARE2_Msk;
+		}
+	}
 }
