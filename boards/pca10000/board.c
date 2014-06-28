@@ -58,7 +58,7 @@ void board_init(void)
 
     /* blink stuff */
 
-    while (1) {
+/*    while (1) {
 
 
 		while(uart_read_blocking(0,&charUART))  {
@@ -114,7 +114,7 @@ void board_init(void)
             asm("nop");
         }
 
-    }
+    } */
 }
 
 void delay(uint32_t microseconds){

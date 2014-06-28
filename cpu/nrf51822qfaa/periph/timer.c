@@ -40,10 +40,12 @@ typedef struct {
  * page 90 in nrf51822.pdf
  * TimerFrequency = fTimer = HFCLK / (2 ^ Prescaler)
  * nrf51822 has 4 Timer Capture/Compare Registers
+ * and 3 Hardware Timers
  */
 timer_conf_t config[TIMER_NUMOF];
 
-int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int)) {
+int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
+{
 
 	volatile NRF_TIMER_Type * p_timer;
 
@@ -83,6 +85,9 @@ int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int)) {
 		NVIC_EnableIRQ(TIMER2_IRQn);
 		break;
 #endif
+    case TIMER_UNDEFINED:
+        break;
+
 
 	}
 
@@ -91,6 +96,7 @@ int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int)) {
 
 	p_timer->BITMODE = TIMER_BITMODE_BITMODE_32Bit;	//32 Bit Mode
 	p_timer->MODE    = TIMER_MODE_MODE_Timer;       // Set the timer in Timer Mode.
+	p_timer->TASKS_CLEAR    = 1;                    // clear the task first to be usable for later.
 
 	switch (ticks_per_us) {
 		case 1:
@@ -110,6 +116,7 @@ int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int)) {
 			break;
 
 		default:
+			p_timer->PRESCALER = 1;
 			break;
 	}
 	p_timer->TASKS_START = 1;
@@ -118,7 +125,8 @@ int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int)) {
 	return 1;
 }
 
-int timer_set(tim_t dev, int channel, unsigned int timeout) {
+int timer_set(tim_t dev, int channel, unsigned int timeout)
+{
 	volatile NRF_TIMER_Type * p_timer;
 
 	/* get timer base register address */
@@ -141,6 +149,9 @@ int timer_set(tim_t dev, int channel, unsigned int timeout) {
 		p_timer = NRF_TIMER2;
 		break;
 #endif
+    case TIMER_UNDEFINED:
+        break;
+
 
 	}
 
@@ -150,21 +161,25 @@ int timer_set(tim_t dev, int channel, unsigned int timeout) {
 		case 0:
 			p_timer->CC[0] = timeout;
 			p_timer->INTENSET |= TIMER_INTENSET_COMPARE0_Msk;
+			//p_timer->INTENSET = (TIMER_INTENSET_COMPARE0_Enabled << TIMER_INTENSET_COMPARE0_Pos);
 
 			break;
 		case 1:
 			p_timer->CC[1] = timeout;
 			p_timer->INTENSET |= TIMER_INTENSET_COMPARE1_Msk;
+			//p_timer->INTENSET = (TIMER_INTENSET_COMPARE1_Enabled << TIMER_INTENSET_COMPARE1_Pos);
 
 			break;
 		case 2:
 			p_timer->CC[2] = timeout;
 			p_timer->INTENSET |= TIMER_INTENSET_COMPARE2_Msk;
+			//p_timer->INTENSET = (TIMER_INTENSET_COMPARE2_Enabled << TIMER_INTENSET_COMPARE2_Pos);
 
 			break;
 		case 3:
 			p_timer->CC[3] = timeout;
 			p_timer->INTENSET |= TIMER_INTENSET_COMPARE3_Msk;
+			//p_timer->INTENSET = (TIMER_INTENSET_COMPARE3_Enabled << TIMER_INTENSET_COMPARE3_Pos);
 
 			break;
 		default:
@@ -173,7 +188,8 @@ int timer_set(tim_t dev, int channel, unsigned int timeout) {
 	return 1;
 }
 
-int timer_clear(tim_t dev, int channel) {
+int timer_clear(tim_t dev, int channel)
+{
 	volatile NRF_TIMER_Type * p_timer;
 
 	/* get timer base register address */
@@ -196,6 +212,8 @@ int timer_clear(tim_t dev, int channel) {
 		p_timer = NRF_TIMER2;
 		break;
 #endif
+    case TIMER_UNDEFINED:
+        break;
 
 	}
 
@@ -227,7 +245,8 @@ int timer_clear(tim_t dev, int channel) {
 	return 1;
 }
 
-unsigned int timer_read(tim_t dev) {
+unsigned int timer_read(tim_t dev)
+{
     switch (dev) {
 #if TIMER_0_EN
         case TIMER_0:
@@ -247,7 +266,8 @@ unsigned int timer_read(tim_t dev) {
     }
 }
 
-void timer_start(tim_t dev) {
+void timer_start(tim_t dev)
+{
     switch (dev) {
 #if TIMER_0_EN
         case TIMER_0:
@@ -294,7 +314,8 @@ void timer_stop(tim_t dev) {
     }
 }
 
-void timer_irq_enable(tim_t dev) {
+void timer_irq_enable(tim_t dev)
+{
     switch (dev) {
 #if TIMER_0_EN
         case TIMER_0:
@@ -316,7 +337,8 @@ void timer_irq_enable(tim_t dev) {
     }
 }
 
-void timer_irq_disable(tim_t dev) {
+void timer_irq_disable(tim_t dev)
+{
     switch (dev) {
 #if TIMER_0_EN
         case TIMER_0:
@@ -345,8 +367,6 @@ void timer_reset(tim_t dev)
 
 void isr_timer0(void)
 {
-	//TODO INterrupt prüfen warum wurde ich aufgerufen, entsprechend für andere events
-
 	for(int i = 0; i<4; i++){
 		if(NRF_TIMER0->EVENTS_COMPARE[i] == 1){
 			config[0].cb(i);
