@@ -25,9 +25,18 @@
 #include "nrf_delay.h"
 #include "nrf51_bitfields.h"
 #include "periph/uart.h"
+#include "periph/timer.h"
+#include "hwtimer_arch.h"
+#include "thread.h"
+#include "periph/gpio.h"
 
 extern void SystemInit(void);
 void leds_init(void);
+
+void printInt(int i){
+	printf("timer %d \n",i);
+}
+
 
 
 void board_init(void)
@@ -54,6 +63,20 @@ void board_init(void)
 		outputchar = output[i++];
 	}
 	i = 0;
+
+/*
+	timer_init(TIMER_0, 1, &printInt);
+	timer_init(TIMER_1, 1, &printInt);
+	timer_init(TIMER_2, 1, &printInt);
+	timer_set(TIMER_0,1,1000);
+	timer_set(TIMER_0, 4, 4000);
+	timer_set(TIMER_1,2, 12000 );
+	timer_set(TIMER_1,3, 13000);
+	timer_set(TIMER_2, 0, 20000);
+	timer_start(TIMER_0);
+	timer_start(TIMER_1);
+	timer_start(TIMER_2);*/
+
 
 
     /* blink stuff */
@@ -116,6 +139,7 @@ void board_init(void)
 
     } */
 }
+
 
 void delay(uint32_t microseconds){
     /* perform busy-waiting for specified number of microseconds  */
