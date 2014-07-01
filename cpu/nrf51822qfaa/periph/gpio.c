@@ -55,7 +55,7 @@ int gpio_init_out(gpio_t dev, gpio_pp_t pullup)
         case GPIO_4:
         	nrf_gpio_cfg_output(GPIO_4);
             break;
-#endif;
+#endif
 #if GPIO_5_EN
         case GPIO_5:
         	nrf_gpio_cfg_output(GPIO_5);
@@ -163,7 +163,7 @@ int gpio_init_in(gpio_t dev, gpio_pp_t pullup)
         case GPIO_4:
         	pin = (GPIO_4);
             break;
-#endif;
+#endif
 #if GPIO_5_EN
         case GPIO_5:
         	pin = (GPIO_5);
@@ -273,7 +273,7 @@ int gpio_read(gpio_t dev)
         case GPIO_4:
         	return nrf_gpio_pin_read(GPIO_4);
             break;
-#endif;
+#endif
 #if GPIO_5_EN
         case GPIO_5:
         	return nrf_gpio_pin_read(GPIO_5);
@@ -363,7 +363,7 @@ int gpio_set(gpio_t dev)
         case GPIO_4:
         	nrf_gpio_pin_set(GPIO_4);
             break;
-#endif;
+#endif
 #if GPIO_5_EN
         case GPIO_5:
         	nrf_gpio_pin_set(GPIO_5);
@@ -454,7 +454,7 @@ int gpio_clear(gpio_t dev)
 	        case GPIO_4:
 	        	nrf_gpio_pin_clear(GPIO_4);
 	            break;
-	#endif;
+	#endif
 	#if GPIO_5_EN
 	        case GPIO_5:
 	        	nrf_gpio_pin_clear(GPIO_5);

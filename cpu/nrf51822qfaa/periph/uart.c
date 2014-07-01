@@ -151,8 +151,6 @@ void uart_tx_end(uart_t uart) {
 }
 
 int uart_write(uart_t uart, char data) {
-	/*copy from cpu/sam3x8e/periph/uart.c*/
-	//TODO Register adjust
 	switch (uart) {
 	case UART_0:
 		NRF_UART0->TXD = (uint8_t) data;
@@ -164,18 +162,15 @@ int uart_write(uart_t uart, char data) {
 	return 1;
 }
 
-int uart_read_blocking(uart_t uart, char *data) { /*copy from cpu/sam3x8e/periph/uart.c*/
-	//TODO adjust Registers
+int uart_read_blocking(uart_t uart, char *data) {
 	switch (uart) {
 	case UART_0:
 		while (NRF_UART0->EVENTS_RXDRDY != 1) {
 			// Wait for RXD data to be received
 		}
 
-		//strcpy(data, NRF_UART0->RXD);
 		*data = (char) NRF_UART0->RXD;
 		NRF_UART0->EVENTS_RXDRDY = 0;
-		//*data = (char)NRF_UART0->RXD;
 
 		break;
 	case UART_UNDEFINED:
@@ -184,8 +179,7 @@ int uart_read_blocking(uart_t uart, char *data) { /*copy from cpu/sam3x8e/periph
 	return 1;
 }
 
-int uart_write_blocking(uart_t uart, char data) { /*copy from cpu/sam3x8e/periph/uart.c*/
-	//TODO adjust Registers
+int uart_write_blocking(uart_t uart, char data) {
 	//Using:
 	/* while (ch != '\0')
 	 {

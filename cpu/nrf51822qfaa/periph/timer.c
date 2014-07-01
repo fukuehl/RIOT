@@ -49,6 +49,7 @@ int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
 
 	volatile NRF_TIMER_Type * p_timer;
 
+/*
     // Start 16 MHz crystal oscillator.
     NRF_CLOCK->EVENTS_HFCLKSTARTED  = 0;
     NRF_CLOCK->TASKS_HFCLKSTART     = 1;
@@ -59,6 +60,7 @@ int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
         // Do nothing.
     }
 
+*/
 
 	switch (dev) {
 
@@ -119,7 +121,6 @@ int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
 			p_timer->PRESCALER = 1;
 			break;
 	}
-	p_timer->TASKS_START = 1;
 
 
 	return 1;

@@ -19,22 +19,25 @@
  */
 
 #include <stdio.h>
+#include "periph/timer.h"
 #include "board.h"
 #include "cpu.h"
 #include "nrf51.h"
 #include "nrf_delay.h"
-#include "nrf51_bitfields.h"
+//#include "nrf51_bitfields.h"
 #include "periph/uart.h"
-#include "periph/timer.h"
-#include "hwtimer_arch.h"
-#include "thread.h"
+
+//#include "hwtimer_arch.h"
+//#include "thread.h"
 #include "periph/gpio.h"
+
+//#include "radio.h"
 
 extern void SystemInit(void);
 void leds_init(void);
 
 void printInt(int i){
-	printf("timer %d \n",i);
+	printf("timer %d ausgabe\n",i);
 }
 
 
@@ -54,28 +57,41 @@ void board_init(void)
 
     /*initialize UART */
     uart_init_blocking(0, 115200);
-    /*uart_init_blocking(UART_0,115200);*/
-    char* output = "Hello World!\r\n";
+    char* output = "Hello User!\r\n";
     char outputchar = output[i++];
 	while ( outputchar != '\0')
 	{
 		uart_write_blocking(0, outputchar);
 		outputchar = output[i++];
 	}
+	LED_BLUE_ON;
 	i = 0;
 
-/*
+	timer_stop(TIMER_0);
+	timer_clear(TIMER_0,0);
+	timer_clear(TIMER_0, 2);
+	timer_clear(TIMER_0,3);
+	timer_irq_disable(TIMER_0);
+
+
 	timer_init(TIMER_0, 1, &printInt);
-	timer_init(TIMER_1, 1, &printInt);
-	timer_init(TIMER_2, 1, &printInt);
-	timer_set(TIMER_0,1,1000);
-	timer_set(TIMER_0, 4, 4000);
-	timer_set(TIMER_1,2, 12000 );
-	timer_set(TIMER_1,3, 13000);
-	timer_set(TIMER_2, 0, 20000);
+	//timer_init(TIMER_1, 1, &printInt);
+	//timer_init(TIMER_2, 1, &printInt);
+	timer_set(TIMER_0,0,800);
+	//TODO: timerset..1000 -> no output, 100-> constant output WHY?
+	//timer_set(TIMER_0,2,400);
+	timer_set(TIMER_0, 3, 200);
+	//printf("TimerRead: %d", timer_read(TIMER_0));
+	timer_irq_enable(TIMER_0);
+	//timer_set(TIMER_1,2, 12000 );
+	//timer_set(TIMER_1,3, 13000);
+	//timer_set(TIMER_2, 0, 20000);
 	timer_start(TIMER_0);
-	timer_start(TIMER_1);
-	timer_start(TIMER_2);*/
+
+	//timer_stop(TIMER_0);
+	//timer_start(TIMER_1);
+	//timer_start(TIMER_2);
+
 
 
 
