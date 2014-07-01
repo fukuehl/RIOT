@@ -96,31 +96,36 @@ int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
 	/* save callback */
 	config[dev].cb = callback;
 
+	//p_timer->TASKS_STOP = 1;
+
 	p_timer->BITMODE = TIMER_BITMODE_BITMODE_32Bit;	//32 Bit Mode
 	p_timer->MODE    = TIMER_MODE_MODE_Timer;       // Set the timer in Timer Mode.
 	p_timer->TASKS_CLEAR    = 1;                    // clear the task first to be usable for later.
 
 	switch (ticks_per_us) {
 		case 1:
-			p_timer->PRESCALER = 0;
+			p_timer->PRESCALER = 4;
 			break;
 		case 2:
-			p_timer->PRESCALER = 1;
+			p_timer->PRESCALER = 5;
 			break;
 		case 4:
-			p_timer->PRESCALER = 2;
+			p_timer->PRESCALER = 6;
 			break;
 		case 8:
-			p_timer->PRESCALER = 3;
+			p_timer->PRESCALER = 7;
 			break;
 		case 16:
-			p_timer->PRESCALER = 4;
+			p_timer->PRESCALER = 8;
 			break;
 
 		default:
 			p_timer->PRESCALER = 1;
 			break;
 	}
+	p_timer->INTENSET = TIMER_INTENSET_COMPARE0_Enabled << TIMER_INTENSET_COMPARE0_Pos;
+	p_timer->SHORTS = (TIMER_SHORTS_COMPARE0_CLEAR_Enabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos);
+	p_timer->TASKS_START = 1;
 
 
 	return 1;
@@ -370,8 +375,9 @@ void isr_timer0(void)
 {
 	for(int i = 0; i<4; i++){
 		if(NRF_TIMER0->EVENTS_COMPARE[i] == 1){
+			NRF_TIMER0->INTENCLR |= (1 << (16 + i));
+			//NRF_TIMER0->INTENSET |= (1 << 16);
 			config[0].cb(i);
-			NRF_TIMER0->INTENCLR &= ~TIMER_INTENCLR_COMPARE0_Msk;
 		}
 	}
 }
@@ -380,8 +386,8 @@ void isr_timer1(void)
 {
 	for(int i = 0; i<4; i++){
 		if(NRF_TIMER1->EVENTS_COMPARE[i] == 1){
+			NRF_TIMER1->INTENCLR |= (1 << (16 + i));
 			config[1].cb(i);
-			NRF_TIMER1->INTENCLR &= ~TIMER_INTENCLR_COMPARE1_Msk;
 		}
 	}
 }
@@ -390,8 +396,8 @@ void isr_timer2(void)
 {
 	for(int i = 0; i<4; i++){
 		if(NRF_TIMER2->EVENTS_COMPARE[i] == 1){
+			NRF_TIMER2->INTENCLR |= (1 << (16 + i));
 			config[2].cb(i);
-			NRF_TIMER2->INTENCLR &= ~TIMER_INTENCLR_COMPARE2_Msk;
 		}
 	}
 }

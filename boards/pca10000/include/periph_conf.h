@@ -23,9 +23,10 @@
 /**
  * @brief Timer configuration
  */
-#define TIMER_NUMOF         (1U)
+#define TIMER_NUMOF         (2U)
 #define TIMER_0_EN          1
-#define TIMER_1_EN          0
+#define TIMER_1_EN          1
+#define TIMER_2_EN			0
 
 /* Timer 0 configuration */
 #define TIMER_0_DEV         TIM2
@@ -51,9 +52,9 @@
 /**
  * @brief UART configuration
  */
-#define UART_NUMOF          (2U)
+#define UART_NUMOF          (1U)
 #define UART_0_EN           1
-#define UART_1_EN           1
+#define UART_1_EN           0
 #define UART_IRQ_PRIO       1
 #define UART_CLK            14000000
 

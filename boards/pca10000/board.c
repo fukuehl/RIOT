@@ -64,35 +64,39 @@ void board_init(void)
 		uart_write_blocking(0, outputchar);
 		outputchar = output[i++];
 	}
-	LED_BLUE_ON;
+	LED_RED_ON;
 	i = 0;
-
-	timer_stop(TIMER_0);
-	timer_clear(TIMER_0,0);
-	timer_clear(TIMER_0, 2);
-	timer_clear(TIMER_0,3);
-	timer_irq_disable(TIMER_0);
 
 
 	timer_init(TIMER_0, 1, &printInt);
 	//timer_init(TIMER_1, 1, &printInt);
 	//timer_init(TIMER_2, 1, &printInt);
-	timer_set(TIMER_0,0,800);
+	timer_set(TIMER_0,0,8*1000*1000);
 	//TODO: timerset..1000 -> no output, 100-> constant output WHY?
-	//timer_set(TIMER_0,2,400);
-	timer_set(TIMER_0, 3, 200);
+	timer_set(TIMER_0,2,4*1000*1000);
+	timer_set(TIMER_0, 3, 1000*1000);
 	//printf("TimerRead: %d", timer_read(TIMER_0));
-	timer_irq_enable(TIMER_0);
 	//timer_set(TIMER_1,2, 12000 );
 	//timer_set(TIMER_1,3, 13000);
 	//timer_set(TIMER_2, 0, 20000);
-	timer_start(TIMER_0);
 
 	//timer_stop(TIMER_0);
 	//timer_start(TIMER_1);
 	//timer_start(TIMER_2);
 
+	while(1){
+		for(int i=0; i <= 1 * 1000;i++){
+			asm("nop");
+		}
+		int a = timer_read(TIMER_0);
 
+		if ( a < 8*1000*1000){
+			int k = NRF_TIMER0->TASKS_CAPTURE[1];
+			printf("timerCC : %i|| timerTaskCount: %i \n", a, k);
+
+		}
+
+	}
 
 
     /* blink stuff */
