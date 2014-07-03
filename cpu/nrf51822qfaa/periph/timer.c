@@ -96,7 +96,7 @@ int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
 	/* save callback */
 	config[dev].cb = callback;
 
-	//p_timer->TASKS_STOP = 1;
+	p_timer->TASKS_STOP = 1;
 
 	p_timer->BITMODE = TIMER_BITMODE_BITMODE_32Bit;	//32 Bit Mode
 	p_timer->MODE    = TIMER_MODE_MODE_Timer;       // Set the timer in Timer Mode.
@@ -256,6 +256,7 @@ unsigned int timer_read(tim_t dev)
     switch (dev) {
 #if TIMER_0_EN
         case TIMER_0:
+        	NRF_TIMER0->TASKS_CAPTURE[0] = 1;
             return NRF_TIMER0->CC[0];
 #endif
 #if TIMER_1_EN
@@ -375,8 +376,12 @@ void isr_timer0(void)
 {
 	for(int i = 0; i<4; i++){
 		if(NRF_TIMER0->EVENTS_COMPARE[i] == 1){
-			NRF_TIMER0->INTENCLR |= (1 << (16 + i));
-			//NRF_TIMER0->INTENSET |= (1 << 16);
+			printf("Wir sind hier in isr_timer0. i ist %i \n\n", i);
+			NRF_TIMER0->INTENCLR |= TIMER_INTENCLR_COMPARE2_Msk;
+			//NRF_TIMER0->CC[i] = 0;
+			NRF_TIMER0->INTENSET |= TIMER_INTENSET_COMPARE3_Msk;
+
+
 			config[0].cb(i);
 		}
 	}
