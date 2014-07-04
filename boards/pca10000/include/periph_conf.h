@@ -26,15 +26,29 @@
 #define TIMER_NUMOF         (3U)
 #define TIMER_0_EN          1
 #define TIMER_1_EN          1
-#define TIMER_2_EN			 1
-#define TIMER_IRQ_PRIO		1
+#define TIMER_2_EN          1
+#define TIMER_IRQ_PRIO      1
 
 /* Timer 0 configuration */
 #define TIMER_0_DEV         NRF_TIMER0
-#define TIMER_0_CHANNELS    4
+#define TIMER_0_CHANNELS    3
 #define TIMER_0_MAX_VALUE   (0xffffffff)
 #define TIMER_0_ISR         isr_timer0
-#define TIMER_0_IRQ    		 TIMER0_IRQn
+#define TIMER_0_IRQ         TIMER0_IRQn
+
+
+#define TIMER_1_DEV         NRF_TIMER1
+#define TIMER_1_CHANNELS    3
+#define TIMER_1_MAX_VALUE   (0xffffffff)
+#define TIMER_1_ISR         isr_timer1
+#define TIMER_1_IRQ         TIMER1_IRQn
+
+
+#define TIMER_2_DEV         NRF_TIMER2
+#define TIMER_2_CHANNELS    3
+#define TIMER_2_MAX_VALUE   (0xffffffff)
+#define TIMER_2_ISR         isr_timer2
+#define TIMER_2_IRQ         TIMER2_IRQn
 
 ///* Timer 1 configuration */
 //#define TIMER_1_DEV         TIMx
@@ -47,14 +61,14 @@
 //#define TIMER_1_IRQ_PRIO    1
 
 /* Timer 1 configuration */
-#define TIMER_1_DEV         TIMx                                                        /* TODO */
-#define TIMER_1_CHANNELS
-#define TIMER_1_PRESCALER   (47U)
-#define TIMER_1_MAX_VALUE   (0xffff)
-#define TIMER_1_CLKEN()
-#define TIMER_1_ISR
-#define TIMER_1_IRQCHAN
-#define TIMER_1_IRQ_PRIO
+//#define TIMER_1_DEV         TIMx                                                        /* TODO */
+//#define TIMER_1_CHANNELS
+//#define TIMER_1_PRESCALER   (47U)
+//#define TIMER_1_MAX_VALUE   (0xffff)
+//#define TIMER_1_CLKEN()
+//#define TIMER_1_ISR
+//#define TIMER_1_IRQCHAN
+//#define TIMER_1_IRQ_PRIO
 
 
 /**

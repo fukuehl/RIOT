@@ -37,18 +37,18 @@ extern void SystemInit(void);
 void leds_init(void);
 
 void printInt(int i){
-	printf("timer0: channel: %d\n",i);
+    printf("timer0: channel: %d\n",i);
 }
 void printInt2(int i){
-	printf("timer1: channel: %d\n",i);
+    printf("timer1: channel: %d\n",i);
 }
 
 
 
 void board_init(void)
 {
-	char charUART = '\0';
-	int i = 0;
+    char charUART = '\0';
+    int i = 0;
     /* initialize core clocks via STM-lib given function */
     SystemInit();
 
@@ -62,44 +62,44 @@ void board_init(void)
     uart_init_blocking(0, 115200);
     char* output = "Hello User!\r\n";
     char outputchar = output[i++];
-	while ( outputchar != '\0')
-	{
-		uart_write_blocking(0, outputchar);
-		outputchar = output[i++];
-	}
-	LED_RED_ON;
-	i = 0;
+    while ( outputchar != '\0')
+    {
+        uart_write_blocking(0, outputchar);
+        outputchar = output[i++];
+    }
+    LED_RED_ON;
+    i = 0;
 
 
-	timer_init(TIMER_0, 1, printInt);
-	timer_set(TIMER_0,0,2*1000*1000);
-	timer_set(TIMER_0,1,4*1000*1000);
-	timer_set(TIMER_0,2, 6*1000*1000);
-	timer_set(TIMER_0,3, 8*1000*1000);
+    //timer_init(TIMER_0, 1, printInt);
+    timer_init(TIMER_2, 1, printInt2);
+
+    timer_set(TIMER_2,0,2*1000*1000);
+    timer_set(TIMER_2,1,4*1000*1000);
+    timer_set(TIMER_2,2,6*1000*1000);
 
 
-	timer_init(TIMER_1, 1, printInt2);
-	timer_set(TIMER_1,0,1*1000*1000);
-	timer_set(TIMER_1,1,3*1000*1000);
-	timer_set(TIMER_1,2,5*1000*1000);
-	timer_set(TIMER_1,3,7*1000*1000);
+
+//    timer_set(TIMER_1,0,10*1000*1000);
+//    timer_set(TIMER_1,1,11*1000*1000);
+//    timer_set(TIMER_1,2,12*1000*1000);
 
 
-	int k = 0;
-	while(1){
-		k++;
-		for(int i=0; i <= 1 * 1000 * 1000;i++){
-			asm("nop");
-		}
-		//int a = timer_read(TIMER_0);
+    int k = 0;
+    while(1){
+        k++;
+        for(int i=0; i <= 1 * 1000 * 1000;i++){
+            asm("nop");
+        }
+        //int a = timer_read(TIMER_0);
 
-		//if ( a <= 8*1000*1000){
-			//int k = NRF_TIMER0->TASKS_CAPTURE[1];
-			//printf("k : %i\n", k);
+        //if ( a <= 8*1000*1000){
+            //int k = NRF_TIMER0->TASKS_CAPTURE[1];
+            //printf("k : %i\n", k);
 
-		//}
+        //}
 
-	}
+    }
 
 
     /* blink stuff */
@@ -107,9 +107,9 @@ void board_init(void)
 /*    while (1) {
 
 
-		while(uart_read_blocking(0,&charUART))  {
-				uart_write_blocking(0, charUART);
-		}
+        while(uart_read_blocking(0,&charUART))  {
+                uart_write_blocking(0, charUART);
+        }
 
 
         for (int i = 0; i < 1000000; i++) {
