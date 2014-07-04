@@ -36,11 +36,14 @@
 extern void SystemInit(void);
 void leds_init(void);
 
-void printInt(int i){
+void printInt0(int i){
     printf("timer0: channel: %d\n",i);
 }
-void printInt2(int i){
+void printInt1(int i){
     printf("timer1: channel: %d\n",i);
+}
+void printInt2(int i){
+    printf("timer2: channel: %d\n",i);
 }
 
 
@@ -67,16 +70,18 @@ void board_init(void)
         uart_write_blocking(0, outputchar);
         outputchar = output[i++];
     }
+    LED_BLUE_OFF;
+    LED_GREEN_OFF;
     LED_RED_ON;
     i = 0;
 
 
-    //timer_init(TIMER_0, 1, printInt);
-    timer_init(TIMER_2, 1, printInt2);
-
-    timer_set(TIMER_2,0,2*1000*1000);
-    timer_set(TIMER_2,1,4*1000*1000);
-    timer_set(TIMER_2,2,6*1000*1000);
+    //timer_init(TIMER_0, 1, printInt0);
+//    timer_init(TIMER_0, 1, printInt0);
+//
+//    timer_set(TIMER_0,0,2*1000*1000);
+//    timer_set(TIMER_0,1,4*1000*1000);
+//    timer_set(TIMER_0,2,6*1000*1000);
 
 
 
@@ -85,21 +90,7 @@ void board_init(void)
 //    timer_set(TIMER_1,2,12*1000*1000);
 
 
-    int k = 0;
-    while(1){
-        k++;
-        for(int i=0; i <= 1 * 1000 * 1000;i++){
-            asm("nop");
-        }
-        //int a = timer_read(TIMER_0);
 
-        //if ( a <= 8*1000*1000){
-            //int k = NRF_TIMER0->TASKS_CAPTURE[1];
-            //printf("k : %i\n", k);
-
-        //}
-
-    }
 
 
     /* blink stuff */

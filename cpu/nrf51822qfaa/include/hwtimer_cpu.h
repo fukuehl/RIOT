@@ -23,7 +23,8 @@
  * @name Hardware timer configuration
  * @{
  */
-#define HWTIMER_MAXTIMERS   4               /**< the CPU implementation supports 4 HW timers */
+#define HWTIMER_MAXTIMERS   3               /**< the CPU implementation supports 3 HW timers */
+
 #define HWTIMER_SPEED       1000000         /**< the HW timer runs with 1MHz */
 #define HWTIMER_MAXTICKS    (0xFFFFFFFF)    /**< 32-bit timer */
 /** @} */

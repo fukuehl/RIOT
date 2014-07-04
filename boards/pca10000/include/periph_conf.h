@@ -23,10 +23,10 @@
 /**
  * @brief Timer configuration
  */
-#define TIMER_NUMOF         (3U)
+#define TIMER_NUMOF         (1U)
 #define TIMER_0_EN          1
-#define TIMER_1_EN          1
-#define TIMER_2_EN          1
+#define TIMER_1_EN          0
+#define TIMER_2_EN          0
 #define TIMER_IRQ_PRIO      1
 
 /* Timer 0 configuration */

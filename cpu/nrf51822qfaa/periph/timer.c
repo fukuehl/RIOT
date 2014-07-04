@@ -395,7 +395,8 @@ __attribute__((naked)) void TIMER_0_ISR(void)
 }
 #endif
 
-__attribute__((naked)) void isr_timer1(void)
+#if TIMER_1_EN
+__attribute__((naked)) void TIMER_1_ISR(void)
 {
     ISR_ENTER();
     for(int i = 0; i < TIMER_1_CHANNELS; i++){
@@ -410,8 +411,10 @@ __attribute__((naked)) void isr_timer1(void)
     }
     ISR_EXIT();
 }
+#endif
 
-__attribute__((naked)) void isr_timer2(void)
+#if TIMER_2_EN
+__attribute__((naked)) void TIMER_2_ISR(void)
 {
     ISR_ENTER();
     for(int i = 0; i < TIMER_2_CHANNELS; i++){
@@ -425,3 +428,4 @@ __attribute__((naked)) void isr_timer2(void)
     }
     ISR_EXIT();
 }
+#endif
