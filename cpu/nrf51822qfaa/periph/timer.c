@@ -47,7 +47,7 @@ timer_conf_t config[TIMER_NUMOF];
 int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
 {
 
-	volatile NRF_TIMER_Type * p_timer;
+	NRF_TIMER_Type *p_timer;
 
 /*
     // Start 16 MHz crystal oscillator.
@@ -66,9 +66,9 @@ int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
 
 #if TIMER_0_EN
 	case (TIMER_0):
-		p_timer = NRF_TIMER0;
-		NVIC_SetPriority(TIMER0_IRQn, 1);
-		NVIC_EnableIRQ(TIMER0_IRQn);
+		p_timer = TIMER_0_DEV;
+		NVIC_SetPriority(TIMER_0_IRQ, TIMER_IRQ_PRIO);
+		NVIC_EnableIRQ(TIMER_0_IRQ);
 		break;
 #endif
 
@@ -123,8 +123,11 @@ int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
 			p_timer->PRESCALER = 1;
 			break;
 	}
-	p_timer->INTENSET = TIMER_INTENSET_COMPARE0_Enabled << TIMER_INTENSET_COMPARE0_Pos;
+	//p_timer->INTENSET = TIMER_INTENSET_COMPARE0_Enabled << TIMER_INTENSET_COMPARE0_Pos;
 	p_timer->SHORTS = (TIMER_SHORTS_COMPARE0_CLEAR_Enabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos);
+	p_timer->SHORTS = (TIMER_SHORTS_COMPARE1_CLEAR_Enabled << TIMER_SHORTS_COMPARE1_CLEAR_Pos);
+	p_timer->SHORTS = (TIMER_SHORTS_COMPARE2_CLEAR_Enabled << TIMER_SHORTS_COMPARE2_CLEAR_Pos);
+	p_timer->SHORTS = (TIMER_SHORTS_COMPARE3_CLEAR_Enabled << TIMER_SHORTS_COMPARE3_CLEAR_Pos);
 	p_timer->TASKS_START = 1;
 
 
@@ -165,7 +168,7 @@ int timer_set(tim_t dev, int channel, unsigned int timeout)
 
 	switch (channel) {
 		case 0:
-			p_timer->CC[0] = timeout;
+			p_timer->CC[0] = timeout; //TODO: relativ zum internern counter...internen counte rüber channel 4 auslesen,dann nur 3 offiziell anbieten
 			p_timer->INTENSET |= TIMER_INTENSET_COMPARE0_Msk;
 			//p_timer->INTENSET = (TIMER_INTENSET_COMPARE0_Enabled << TIMER_INTENSET_COMPARE0_Pos);
 
@@ -372,37 +375,51 @@ void timer_reset(tim_t dev)
 	/* TODO */
 }
 
-void isr_timer0(void)
+#if TIMER_0_EN
+__attribute__((naked)) void TIMER_0_ISR(void)
 {
-	for(int i = 0; i<4; i++){
-		if(NRF_TIMER0->EVENTS_COMPARE[i] == 1){
-			printf("Wir sind hier in isr_timer0. i ist %i \n\n", i);
-			NRF_TIMER0->INTENCLR |= TIMER_INTENCLR_COMPARE2_Msk;
-			//NRF_TIMER0->CC[i] = 0;
-			NRF_TIMER0->INTENSET |= TIMER_INTENSET_COMPARE3_Msk;
+	ISR_ENTER();
+	for(int i = 0; i < TIMER_0_CHANNELS; i++){
+		if(TIMER_0_DEV->EVENTS_COMPARE[i] == 1){
 
+//			TIMER_0_DEV->CC[i] = 0;
+			TIMER_0_DEV->EVENTS_COMPARE[i] = 0;
+			TIMER_0_DEV->INTENCLR = (1 << (16 + i));
 
-			config[0].cb(i);
+			config[TIMER_0].cb(i);
 		}
 	}
+	ISR_EXIT();
 }
+#endif
 
-void isr_timer1(void)
+__attribute__((naked)) void isr_timer1(void)
 {
+	ISR_ENTER();
 	for(int i = 0; i<4; i++){
 		if(NRF_TIMER1->EVENTS_COMPARE[i] == 1){
-			NRF_TIMER1->INTENCLR |= (1 << (16 + i));
+
+//			NRF_TIMER1->CC[i] = 0;
+			NRF_TIMER1->EVENTS_COMPARE[i] = 0;
+			NRF_TIMER1->INTENCLR = (1 << (16 + i));
+
 			config[1].cb(i);
 		}
 	}
+	ISR_EXIT();
 }
 
-void isr_timer2(void)
+__attribute__((naked)) void isr_timer2(void)
 {
+	ISR_ENTER();
 	for(int i = 0; i<4; i++){
 		if(NRF_TIMER2->EVENTS_COMPARE[i] == 1){
-			NRF_TIMER2->INTENCLR |= (1 << (16 + i));
+
+			NRF_TIMER2->CC[i] = 0;
+			NRF_TIMER2->EVENTS_COMPARE[i] = 0;
+
 			config[2].cb(i);
 		}
 	}
+	ISR_EXIT();
 }

@@ -37,7 +37,10 @@ extern void SystemInit(void);
 void leds_init(void);
 
 void printInt(int i){
-	printf("timer %d ausgabe\n",i);
+	printf("timer0: channel: %d\n",i);
+}
+void printInt2(int i){
+	printf("timer1: channel: %d\n",i);
 }
 
 
@@ -68,31 +71,31 @@ void board_init(void)
 	i = 0;
 
 
-	timer_init(TIMER_0, 1, &printInt);
-	//timer_init(TIMER_1, 1, &printInt);
-	//timer_init(TIMER_2, 1, &printInt);
-	timer_set(TIMER_0,0,9*1000*1000);
-	//TODO: timerset..1000 -> no output, 100-> constant output WHY?
-	timer_set(TIMER_0,2,10*1000*1000);
-	timer_set(TIMER_0, 3, 11*1000*1000);
-	//printf("TimerRead: %d", timer_read(TIMER_0));
-	//timer_set(TIMER_1,2, 12000 );
-	//timer_set(TIMER_1,3, 13000);
-	//timer_set(TIMER_2, 0, 20000);
+	timer_init(TIMER_0, 1, printInt);
+	timer_set(TIMER_0,0,2*1000*1000);
+	timer_set(TIMER_0,1,4*1000*1000);
+	timer_set(TIMER_0,2, 6*1000*1000);
+	timer_set(TIMER_0,3, 8*1000*1000);
 
-	//timer_stop(TIMER_0);
-	//timer_start(TIMER_1);
-	//timer_start(TIMER_2);
 
+	timer_init(TIMER_1, 1, printInt2);
+	timer_set(TIMER_1,0,1*1000*1000);
+	timer_set(TIMER_1,1,3*1000*1000);
+	timer_set(TIMER_1,2,5*1000*1000);
+	timer_set(TIMER_1,3,7*1000*1000);
+
+
+	int k = 0;
 	while(1){
+		k++;
 		for(int i=0; i <= 1 * 1000 * 1000;i++){
 			asm("nop");
 		}
-		int a = timer_read(TIMER_0);
+		//int a = timer_read(TIMER_0);
 
 		//if ( a <= 8*1000*1000){
-			int k = NRF_TIMER0->TASKS_CAPTURE[1];
-			printf("timerCC : %i|| timerTaskCount: %i \n", a, k);
+			//int k = NRF_TIMER0->TASKS_CAPTURE[1];
+			//printf("k : %i\n", k);
 
 		//}
 
