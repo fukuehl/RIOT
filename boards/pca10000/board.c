@@ -24,7 +24,8 @@
 #include "cpu.h"
 #include "nrf51.h"
 #include "periph/uart.h"
-#include "cmsis_system.h"
+
+extern void SystemInit(void);
 
 void leds_init(void);
 
