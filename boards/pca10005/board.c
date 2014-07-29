@@ -26,7 +26,8 @@
 #include "nrf51.h"
 #include "periph/uart.h"
 #include "periph/gpio.h"
-#include "cmsis_system.h"
+
+extern void SystemInit(void);
 
 void board_init(void)
 {
