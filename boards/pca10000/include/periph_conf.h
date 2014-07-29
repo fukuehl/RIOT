@@ -52,8 +52,10 @@
 #define TIMER_2_ISR         isr_timer2
 #define TIMER_2_IRQ         TIMER2_IRQn
 
+
 /**
- * @brief UART configuration
+ * @name UART configuration
+ * @{
  */
 #define UART_NUMOF          (1U)
 #define UART_0_EN           1
@@ -63,6 +65,10 @@
 
 /* UART 0 device configuration */
 #define UART_0_DEV          NRF_UART0
+#define UART_0_PIN_RX       11
+#define UART_0_PIN_TX       9
+/** @} */
+
 
 /**
  * @brief ADC configuration

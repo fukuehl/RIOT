@@ -30,17 +30,17 @@ void leds_init(void);
 
 void board_init(void)
 {
-    /* initialize core clocks via STM-lib given function */
+    /* initialize the boards LEDs */
+    leds_init();
+
+    /* initialize core clocks via Nordic-lib given function */
     SystemInit();
 
     /* initialize the CPU */
     cpu_init();
 
-    /* initialize the boards LEDs */
-    leds_init();
-
-    /*initialize UART */
-    uart_init_blocking(0, 115200);
+    // /*initialize UART */
+    // uart_init_blocking(0, 115200);
 }
 
 /**
