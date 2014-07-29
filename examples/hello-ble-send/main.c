@@ -43,14 +43,21 @@ int main(void)
     gpio_init_out(GPIO_1, GPIO_NOPULL);
 
     radioConfig();
-    char msg = 'Q';
+    //char msg = 'Q';
+    int aInt = 0;
+
+    char str[15];
+
     while(1) {
 
         // sending all the time some message
 
-        sendPacket(1, msg);
+        //sendPacket(1, msg);
+    	sprintf(str, "%d", aInt);
+    	sendDirectedPacket(3,0,str);
 
         delay(100*1000);
+        aInt++;
     }
     return 0;
 }

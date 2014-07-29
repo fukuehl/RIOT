@@ -40,8 +40,8 @@ void board_init(void)
      * initialize UART
      * please see periph_conf.h for UART pins!
      **/
-    gpio_init_in(GPIO_9, GPIO_NOPULL);
-    gpio_init_out(GPIO_11, GPIO_NOPULL);
+//    gpio_init_in(GPIO_9, GPIO_NOPULL);
+//    gpio_init_out(GPIO_11, GPIO_NOPULL);
 
     uart_init_blocking(0, 115200);
 }

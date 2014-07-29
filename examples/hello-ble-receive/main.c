@@ -39,13 +39,26 @@ int main(void)
 {
     gpio_init_out(GPIO_6, GPIO_NOPULL);
     gpio_init_out(GPIO_1, GPIO_NOPULL);
+    int status;
 
     radioConfig();
+    char msg[255];
+	while(1) {
+		//char msg = receivePacket();
+        //printf("message received: %c", msg);
 
-	//while(1) {
-		char msg = receivePacket();
-        printf("message received: %c", msg);
-	//}
+		status = receivePacketTowards(4,0,msg);
+
+		if (status == 1){
+			printf("Received Message: %s\r\n",msg);
+		} else if(status == 0) {
+			printf("Received no Packet\r\n");
+		} else if(status == -1){
+			printf("Received Packet but CRC-Check failed\r\n");
+		} else {
+			printf("Error receiving Packet\r\n");
+		}
+	}
 
     return 0;
 }
