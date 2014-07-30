@@ -53,7 +53,7 @@ void hwtimer_arch_set(unsigned long offset, short timer)
 
 void hwtimer_arch_set_absolute(unsigned long value, short timer)
 {
-    // will not be implemented
+    timer_set_absolute(HW_TIMER, timer, value);
 }
 
 void hwtimer_arch_unset(short timer)
@@ -69,5 +69,4 @@ unsigned long hwtimer_arch_now(void)
 void irq_handler(int channel)
 {
     timeout_handler((short)(channel));
-    thread_yield();
 }
