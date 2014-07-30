@@ -114,11 +114,6 @@ int main(void)
 
     printf("NRF RADIO test application\n");
 
-    while (1) {
-        puts("foobar");
-        vtimer_usleep(1000 * 1000);
-    }
-
     /* initialize the radio */
     nrf_radio_init();
 
