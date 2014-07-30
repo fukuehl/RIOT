@@ -22,7 +22,6 @@
 #include <stdio.h>
 #include "board.h"
 #include "cpu.h"
-#include "nrf51.h"
 #include "periph/uart.h"
 
 extern void SystemInit(void);
@@ -39,19 +38,6 @@ void board_init(void)
 
     /* initialize the CPU */
     cpu_init();
-
-    // uart_init_blocking(UART_0, 115200);
-
-    // while (1) {
-    //     uart_write_blocking(UART_0, 'A');
-    //     uart_write_blocking(UART_0, '\n');
-    //     for (int i = 0; i < 1000000; i++) {
-    //         asm("nop");
-    //     }
-    // }
-
-    // /*initialize UART */
-    // uart_init_blocking(0, 115200);
 }
 
 /**
@@ -67,8 +53,8 @@ void board_init(void)
 void leds_init(void)
 {
     /* set LED pins to function as output */
-    GPIO_DEV->DIRSET = (LED_RED_PIN | LED_GREEN_PIN | LED_BLUE_PIN);
+    NRF_GPIO->DIRSET = (LED_RED_PIN | LED_GREEN_PIN | LED_BLUE_PIN);
 
     /* turn all LEDs off (low active) */
-    GPIO_DEV->OUTSET = (LED_RED_PIN | LED_GREEN_PIN | LED_BLUE_PIN);
+    NRF_GPIO->OUTSET = (LED_RED_PIN | LED_GREEN_PIN | LED_BLUE_PIN);
 }

@@ -22,7 +22,8 @@
 
 
 /**
- * @brief Timer configuration
+ * @name Timer configuration
+ * @{
  */
 #define TIMER_NUMOF         (1U)
 #define TIMER_0_EN          1
@@ -50,6 +51,7 @@
 #define TIMER_2_MAX_VALUE   (0xffff)
 #define TIMER_2_ISR         isr_timer2
 #define TIMER_2_IRQ         TIMER2_IRQn
+/** @} */
 
 
 /**
