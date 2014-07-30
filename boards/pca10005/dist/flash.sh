@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This flash script dynamically generates a file with a set of commands which 
+# This flash script dynamically generates a file with a set of commands which
 # have to be handed to the flashing script of SEGGER (JLinkExe).
 # After that, JLinkExe will be executed with that set of commands to flash the
 # latest .bin file to the board.
@@ -16,7 +16,7 @@ if [[ $APPLICATION == test_* ]]
 then
 	TYPE=tests
 else
-	TYPE=examples	
+	TYPE=examples
 fi
 
 echo "log /dev/null" > $BINDIR/burn.seg
@@ -29,4 +29,11 @@ echo "g" >> $BINDIR/burn.seg
 echo "exit" >> $BINDIR/burn.seg
 echo "" >> $BINDIR/burn.seg
 JLinkExe < $BINDIR/burn.seg
-rm JLink.log
+if [ -f JLink.log ]
+then
+  rm JLink.log
+fi
+if [ -f ~/JLink.log ]
+then
+  rm ~/JLink.log
+fi
