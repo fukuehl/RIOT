@@ -309,13 +309,21 @@ static void radio_disable(void) {
 void radioConfig(void) {
   radio_disable();
 
+  /* power on the RADIO device */
+  printf("radio: powering on the radio\n");
+  NRF_RADIO->POWER = 1;
+
   // Radio config
 //  NRF_RADIO->TXPOWER = (RADIO_TXPOWER_TXPOWER_0dBm
 //      << RADIO_TXPOWER_TXPOWER_Pos);
-  NRF_RADIO->FREQUENCY = 7UL;                // Frequency bin 7, 2407MHz
-  NRF_RADIO->MODE = (RADIO_MODE_MODE_Ble_1Mbit << RADIO_MODE_MODE_Pos);
+  printf("radio: setting channel to %i\n", CHANNEL);
+  NRF_RADIO->FREQUENCY = CHANNEL;
+
+  printf("radio: set to BLE mode\n");
+  NRF_RADIO->MODE = RADIO_MODE_MODE_Ble_1Mbit;
 
   // Radio address config
+  printf("radio: setting up addresses\n");
   NRF_RADIO->PREFIX0 = 0xC4C3C2E7UL;  // Prefix byte of addresses 3 to 0
   NRF_RADIO->PREFIX1 = 0xC5C6C7C8UL;  // Prefix byte of addresses 7 to 4
   NRF_RADIO->BASE0 = 0xE7E7E7E7UL;  // Base address for prefix 0
@@ -324,12 +332,13 @@ void radioConfig(void) {
 
   // Enable device address 0 to use which receiving
   NRF_RADIO->RXADDRESSES = 0x01UL;
-  printf("RXADDRESSES: %i\n", (int) NRF_RADIO->RXADDRESSES);
+  printf("radio: configuring RX address to %02x\n", (int)NRF_RADIO->RXADDRESSES);
 
   // Packet configuration
   NRF_RADIO->PCNF0 = (PACKET0_S1_SIZE << RADIO_PCNF0_S1LEN_Pos)
       | (PACKET0_S0_SIZE << RADIO_PCNF0_S0LEN_Pos)
       | (PACKET0_PAYLOAD_SIZE << RADIO_PCNF0_LFLEN_Pos); //lint !e845 "The right argument to operator '|' is certain to be 0"
+    printf("radio: set PCNF0 to 0x%08x\n", (int)NRF_RADIO->PCNF0);
 
   // Packet configuration
   NRF_RADIO->PCNF1 = (RADIO_PCNF1_WHITEEN_Disabled << RADIO_PCNF1_WHITEEN_Pos)
@@ -337,191 +346,204 @@ void radioConfig(void) {
       | (PACKET1_BASE_ADDRESS_LENGTH << RADIO_PCNF1_BALEN_Pos)
       | (PACKET1_STATIC_LENGTH << RADIO_PCNF1_STATLEN_Pos)
       | (255UL << RADIO_PCNF1_MAXLEN_Pos); //lint !e845 "The right argument to operator '|' is certain to be 0"
+    printf("radio: set PCNF1 to 0x%08x\n", (int)NRF_RADIO->PCNF1);
 
   // CRC Config
-  NRF_RADIO->CRCCNF = (RADIO_CRCCNF_LEN_Two << RADIO_CRCCNF_LEN_Pos); // Number of checksum bits
-  if ((NRF_RADIO->CRCCNF & RADIO_CRCCNF_LEN_Msk)
-      == (RADIO_CRCCNF_LEN_Two << RADIO_CRCCNF_LEN_Pos)) {
-    NRF_RADIO->CRCINIT = 0xFFFFUL;      // Initial value
-    NRF_RADIO->CRCPOLY = 0x11021UL;     // CRC poly: x^16+x^12^x^5+1
-  } else if ((NRF_RADIO->CRCCNF & RADIO_CRCCNF_LEN_Msk)
-      == (RADIO_CRCCNF_LEN_One << RADIO_CRCCNF_LEN_Pos)) {
-    NRF_RADIO->CRCINIT = 0xFFUL;        // Initial value
-    NRF_RADIO->CRCPOLY = 0x107UL;       // CRC poly: x^8+x^2^x^1+1
-  }
+    NRF_RADIO->CRCCNF = 0;
+    printf("radio: set CRCCNF to 0x%08x\n", (int)NRF_RADIO->CRCCNF);
 
-  delay(1 * 1000 * 1000);
+  //NRF_RADIO->CRCCNF = (RADIO_CRCCNF_LEN_Two << RADIO_CRCCNF_LEN_Pos); // Number of checksum bits
+  // if ((NRF_RADIO->CRCCNF & RADIO_CRCCNF_LEN_Msk)
+  //     == (RADIO_CRCCNF_LEN_Two << RADIO_CRCCNF_LEN_Pos)) {
+  //   NRF_RADIO->CRCINIT = 0xFFFFUL;      // Initial value
+  //   NRF_RADIO->CRCPOLY = 0x11021UL;     // CRC poly: x^16+x^12^x^5+1
+  // } else if ((NRF_RADIO->CRCCNF & RADIO_CRCCNF_LEN_Msk)
+  //     == (RADIO_CRCCNF_LEN_One << RADIO_CRCCNF_LEN_Pos)) {
+  //   NRF_RADIO->CRCINIT = 0xFFUL;        // Initial value
+  //   NRF_RADIO->CRCPOLY = 0x107UL;       // CRC poly: x^8+x^2^x^1+1
+  // }
 }
 
-int sendDirectedPacket(uint8_t addr,uint8_t channel, char* msg) {
-	/*status 0: led 1 led 2 off || LED_RED_ON --> radio disabled
-	 status 10: led 1 on led 2 off || LED_YELLOW_ON --> Radio is in the TXIDLE state
-	 status 11: led 1 on led 2 on || LED_GREEN_ON --> Radio is in the TX state */
+/**
+ * @brief alksdjfla
+ *
+ * packet format in RAM:
+ * ------------------------------
+ * | S0 | LENGHT | S1 | PAYLOAD |
+ * ------------------------------
+ *
+ */
+int sendDirectedPacket(uint8_t addr, uint8_t channel, char* msg) {
+    printf("radio: SENDING PACKET\n");
+  /*status 0: led 1 led 2 off || LED_RED_ON --> radio disabled
+   status 10: led 1 on led 2 off || LED_YELLOW_ON --> Radio is in the TXIDLE state
+   status 11: led 1 on led 2 on || LED_GREEN_ON --> Radio is in the TX state */
 
 
-	  NRF_RADIO->TXPOWER = (RADIO_TXPOWER_TXPOWER_0dBm
-	      << RADIO_TXPOWER_TXPOWER_Pos);
+    NRF_RADIO->TXPOWER = (RADIO_TXPOWER_TXPOWER_0dBm << RADIO_TXPOWER_TXPOWER_Pos);
+    printf("radio: set TX power to 0x%08x\n", (int)NRF_RADIO->TXPOWER);
 
-	if (strlen(msg) > (MAX_PACKET_LENGTH - 2)) {
-		printf("Message %s is too long for one Packet", msg);
-		return 1;
-	} else if (strlen(msg) == 0) {
-		/* Use Random Number Generator instead */
-		/*START Random Number Generator */
-		NRF_RNG->TASKS_START = 1;
-		/* 254 bytes payload. */
-		packetToSend[0] = (MAX_PACKET_LENGTH - 2);
-		for (i = 0; i < (MAX_PACKET_LENGTH - 2); i++) {
-			packetToSend[i + 1] = rnd8();
-		}
-	} else {
-		/*Message okay*/
-		packetToSend[0] = strlen(msg);
-		for (int j = 0; j < (strlen(msg)); j++) {
-			packetToSend[j + 1] = msg[j];
-		}
-	}
 
-	/* Set payload pointer */
-	NRF_RADIO->PACKETPTR = (uint32_t) packetToSend;
+  if (strlen(msg) > (MAX_PACKET_LENGTH - 2)) {
+    printf("Message %s is too long for one Packet", msg);
+    return 1;
+  // } else if (strlen(msg) == 0) {
+  //  /* Use Random Number Generator instead */
+  //  /*START Random Number Generator */
+  //  //NRF_RNG->TASKS_START = 1;
+  //   254 bytes payload.
+  //  packetToSend[0] = (MAX_PACKET_LENGTH - 2);
+  //  for (i = 0; i < (MAX_PACKET_LENGTH - 2); i++) {
+  //    packetToSend[i + 1] = rnd8();
+  //  }
+    } else {
+        /*Message okay*/
+        packetToSend[0] = strlen(msg);
+        for (int j = 0; j < (strlen(msg)); j++) {
+            packetToSend[j + 1] = msg[j];
+        }
+    }
 
-	/* Set TX Address 0 till 7*/
-	if (addr > 7){
-		printf("RXADDRESS 0..7 -> value modulo 7 now used\r\n");
-		addr = addr % 7;
-	}
+    /* Set payload pointer */
+    NRF_RADIO->PACKETPTR = (uint32_t) packetToSend;
+    printf("radio: setting payload pointer to 0x%08x\n", (int)packetToSend);
 
-	//NRF_RADIO->TXADDRESS = (1 << addr);
-	NRF_RADIO->TXADDRESS = addr;
+  /* Set TX Address 0 till 7*/
+  // if (addr > 7){
+  //   printf("RXADDRESS 0..7 -> value modulo 7 now used\r\n");
+  //   addr = addr % 7;
+  // }
 
-	NRF_RADIO->FREQUENCY = channel;
+  //NRF_RADIO->TXADDRESS = (1 << addr);
+  // NRF_RADIO->TXADDRESS = addr;
 
-	led(LED_RED);
-	gpio_clear(GPIO_1);
-	gpio_clear(GPIO_6);
+  //NRF_RADIO->FREQUENCY = channel;
 
-	delay(5 * 100 * 1000);
+  led(LED_RED);
+  gpio_clear(GPIO_1);
+  gpio_clear(GPIO_6);
 
-	NRF_RADIO->EVENTS_READY = 0U;
-	NRF_RADIO->TASKS_TXEN = 1U;
+  // delay(5 * 100 * 1000);
 
-	//NRF_RADIO->SHORTS = RADIO_SHORTS_READY_START_Msk;
+  NRF_RADIO->EVENTS_READY = 0U;
+  NRF_RADIO->TASKS_TXEN = 1U;
 
-	while (NRF_RADIO->EVENTS_READY == 0U) {
+  //NRF_RADIO->SHORTS = RADIO_SHORTS_READY_START_Msk;
 
-	}
+  while (NRF_RADIO->EVENTS_READY == 0U);
 
-	NRF_RADIO->EVENTS_END = 0U;
-	/*Start Transmission */
-	NRF_RADIO->TASKS_START = 1U;
+  NRF_RADIO->EVENTS_READY;
+  NRF_RADIO->EVENTS_END = 0U;
+  /*Start Transmission */
+  NRF_RADIO->TASKS_START = 1U;
 
-	/*RADIO state 10 */
-	gpio_set(GPIO_1);
-	gpio_clear(GPIO_6);
-	led(LED_YELLOW);
+  /*RADIO state 10 */
+  gpio_set(GPIO_1);
+  gpio_clear(GPIO_6);
+  led(LED_YELLOW);
 
-	//NRF_RADIO->SHORTS = RADIO_SHORTS_END_DISABLE_Msk;
+  //NRF_RADIO->SHORTS = RADIO_SHORTS_END_DISABLE_Msk;
 
-	while (NRF_RADIO->EVENTS_END == 0U) {
-		delay(5 * 100 * 1000);
-	}
+  while (NRF_RADIO->EVENTS_END == 0U) {
+    delay(5 * 100 * 1000);
+  }
 
-	/*RADIO state 11 */
-	gpio_set(GPIO_1);
-	gpio_set(GPIO_6);
-	led(LED_GREEN);
-	delay(5 * 100 * 1000);
+  /*RADIO state 11 */
+  gpio_set(GPIO_1);
+  gpio_set(GPIO_6);
+  led(LED_GREEN);
+  delay(5 * 100 * 1000);
 
-	printf("send packet[1]= %lu towards Address %lu  \n",
-			(unsigned long) packetToSend[1], (unsigned long) NRF_RADIO->TXADDRESS);
+  printf("send packet[1]= %lu towards Address %lu  \n",
+      (unsigned long) packetToSend[1], (unsigned long) NRF_RADIO->TXADDRESS);
 
-	NRF_RADIO->EVENTS_DISABLED = 0U;
-	/*Disable the Radio */
-	NRF_RADIO->TASKS_DISABLE = 1U;
-	while (NRF_RADIO->EVENTS_DISABLED == 0U) {
+  NRF_RADIO->EVENTS_DISABLED = 0U;
+  /*Disable the Radio */
+  NRF_RADIO->TASKS_DISABLE = 1U;
+  while (NRF_RADIO->EVENTS_DISABLED == 0U) {
 
-	}
+  }
 
-	gpio_clear(GPIO_1);
-	gpio_clear(GPIO_6);
-	led(LED_NONE);
+  gpio_clear(GPIO_1);
+  gpio_clear(GPIO_6);
+  led(LED_NONE);
 
-	return 0;
+  return 0;
 }
 
 int receivePacketTowards(uint8_t rxaddr, uint8_t channel, char* packetPtr) {
-	/*
-	 Return -1 if received nothing --> led 1 off led 2 off || LED_RED_ON
-	 Return 1 if received broken Data(CRC check failed) --led 1 off led 2 on || LED_YELLOW_ON
-	 Return 0 if received data correctly --> led 1 on led 2 on || LED_GREEN_ON
-	 */
+  /*
+   Return -1 if received nothing --> led 1 off led 2 off || LED_RED_ON
+   Return 1 if received broken Data(CRC check failed) --led 1 off led 2 on || LED_YELLOW_ON
+   Return 0 if received data correctly --> led 1 on led 2 on || LED_GREEN_ON
+   */
 
-	char* tmpPtr = malloc(sizeof(char)*MAX_PACKET_LENGTH);
-	strcpy(tmpPtr, packetPtr);
-	/* Set payload pointer */
-	NRF_RADIO->PACKETPTR = (uint32_t) packetPtr;
+  char* tmpPtr = malloc(sizeof(char)*MAX_PACKET_LENGTH);
+  strcpy(tmpPtr, packetPtr);
+  /* Set payload pointer */
+  NRF_RADIO->PACKETPTR = (uint32_t) packetPtr;
 
-	//NRF_RADIO->RXADDRESSES = (rxaddr % 7);
-	//NRF_RADIO->RXADDRESSES = (1 << rxaddr);
-	NRF_RADIO->RXADDRESSES = ((1 << 0) | (1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6) | (1 << 7));
-	printf("rxaddress %lu\r\n",NRF_RADIO->RXADDRESSES);
+  //NRF_RADIO->RXADDRESSES = (rxaddr % 7);
+  //NRF_RADIO->RXADDRESSES = (1 << rxaddr);
+  NRF_RADIO->RXADDRESSES = ((1 << 0) | (1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6) | (1 << 7));
+  printf("rxaddress %lu\r\n",NRF_RADIO->RXADDRESSES);
 
-	NRF_RADIO->FREQUENCY = channel;
+  // NRF_RADIO->FREQUENCY = channel;
 
-	NRF_RADIO->EVENTS_READY = 0U;
-	/* Enable Radio */
-	NRF_RADIO->TASKS_RXEN = 1U;
+  NRF_RADIO->EVENTS_READY = 0U;
+  /* Enable Radio */
+  NRF_RADIO->TASKS_RXEN = 1U;
 
-	//NRF_RADIO->SHORTS = RADIO_SHORTS_READY_START_Msk;
+  //NRF_RADIO->SHORTS = RADIO_SHORTS_READY_START_Msk;
 
-	/* wait for an event to be ready */
-	while (NRF_RADIO->EVENTS_READY == 0U) {
-		led(LED_BLUE);
-		/* Do nothing. */
-	}
+  /* wait for an event to be ready */
+  while (NRF_RADIO->EVENTS_READY == 0U) {
+    led(LED_BLUE);
+    /* Do nothing. */
+  }
 
-	NRF_RADIO->EVENTS_END = 0U;
-	/* Start listening and wait for address received event */
-	NRF_RADIO->TASKS_START = 1U;
+  NRF_RADIO->EVENTS_END = 0U;
+  /* Start listening and wait for address received event */
+  NRF_RADIO->TASKS_START = 1U;
 
-	//NRF_RADIO->SHORTS = RADIO_SHORTS_END_DISABLE_Msk;
+  //NRF_RADIO->SHORTS = RADIO_SHORTS_END_DISABLE_Msk;
 
-	/* Wait for the end of the packet. */
-	while (NRF_RADIO->EVENTS_END == 0U) {
-		/* Do nothing. */
-	}
+  /* Wait for the end of the packet. */
+  while (NRF_RADIO->EVENTS_END == 0U) {
+    /* Do nothing. */
+  }
 
-	NRF_RADIO->EVENTS_DISABLED = 0U;
-	/*Disable the radio */
-	NRF_RADIO->TASKS_DISABLE = 1U;
+  NRF_RADIO->EVENTS_DISABLED = 0U;
+  /*Disable the radio */
+  NRF_RADIO->TASKS_DISABLE = 1U;
 
-	while (NRF_RADIO->EVENTS_DISABLED == 0U) {
-		/* Do nothing. */
-	}
-	/* if did not receive anything return 0
-	 * Should never happen*/
-	if (strcmp(packetPtr, tmpPtr) == 0) {
-		led(LED_RED);
-		gpio_clear(GPIO_1);
-		gpio_clear(GPIO_6);
-		delay(5 * 100 * 1000);
-		return -1;
-	}
+  while (NRF_RADIO->EVENTS_DISABLED == 0U) {
+    /* Do nothing. */
+  }
+  /* if did not receive anything return 0
+   * Should never happen*/
+  if (strcmp(packetPtr, tmpPtr) == 0) {
+    led(LED_RED);
+    gpio_clear(GPIO_1);
+    gpio_clear(GPIO_6);
+    delay(5 * 100 * 1000);
+    return -1;
+  }
 
-	/* If CRC-check failed return -1 */
-	if (NRF_RADIO->CRCSTATUS == 0) {
-		gpio_set(GPIO_1);
-		gpio_clear(GPIO_6);
-		led(LED_YELLOW);
-		delay(5 * 100 * 1000);
-		return 1;
-	} else {
-		gpio_set(GPIO_1);
-		gpio_set(GPIO_6);
-		led(LED_GREEN);
-		delay(5 * 100 * 1000);
-		return 0;
-	}
+  /* If CRC-check failed return -1 */
+  if (NRF_RADIO->CRCSTATUS == 0) {
+    gpio_set(GPIO_1);
+    gpio_clear(GPIO_6);
+    led(LED_YELLOW);
+    delay(5 * 100 * 1000);
+    return 1;
+  } else {
+    gpio_set(GPIO_1);
+    gpio_set(GPIO_6);
+    led(LED_GREEN);
+    delay(5 * 100 * 1000);
+    return 0;
+  }
 
 }
 

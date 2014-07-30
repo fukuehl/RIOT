@@ -19,7 +19,7 @@
  */
 
 #include <stdint.h>
-
+#include "board.h"
 
 /**
  * memory markers as defined in the linker script
@@ -90,6 +90,7 @@ void isr_nmi(void)
 
 void isr_hard_fault(void)
 {
+    LED_RED_ON;
     while (1) {asm ("nop");}
 }
 
