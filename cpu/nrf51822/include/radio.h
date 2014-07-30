@@ -20,6 +20,8 @@
 #ifndef __RADIO_H
 #define __RADIO_H
 
+#define CHANNEL 123
+
 char receivePacket(void);
 void sendPacket(uint8_t addr, char msg);
 void radioConfig(void);

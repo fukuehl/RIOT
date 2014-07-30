@@ -124,7 +124,7 @@ int uart_init_blocking(uart_t uart, uint32_t baudrate)
             UART_0_DEV->PSELRXD = UART_0_PIN_RX;
 
             /* enable hw-flow control if defined */
-#ifdef UART_0_HWFLOWCONTROL
+#ifdef UART_0_HWFLOWCTRL
             UART_0_DEV->PSELRTS = UART_0_PIN_RTS;
             UART_0_DEV->PSELCTS = UART_0_PIN_CTS;
             UART_0_DEV->CONFIG |= 1;        /* enable HW flow control */
