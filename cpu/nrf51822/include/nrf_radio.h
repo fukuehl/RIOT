@@ -21,8 +21,8 @@
 #ifndef __NRF_RADIO_H
 #define __NRF_RADIO_H
 
-#define NRF_RADIO_DEFAULT_MODE              (NRF_RADIO_MODE_1MBIT)
-#define NRF_RADIO_DEFAULT_CHANNEL           (23U)
+#define NRF_RADIO_DEFAULT_MODE              (NRF_RADIO_MODE_BLE1MBIT)
+#define NRF_RADIO_DEFAULT_CHANNEL           (123U)
 #define NRF_RADIO_DEFAULT_TXPOWER           (NRF_RADIO_PWR_M12DBM)      /* chosen arbitrarily */
 
 #define NRF_RADIO_DEFAULT_BASEADDR_LENGTH   (2)                     /* 2 byte base address */
@@ -69,19 +69,6 @@ void nrf_radio_set_power(nrf_radio_power_t power);
 
 void nrf_radio_poweron(void);
 void nrf_radio_poweroff(void);
-
-
-
-
-
-
-
-char receivePacket(void);
-void sendPacket(uint8_t addr, char msg);
-void radioConfig(void);
-int receivePacketTowards(uint8_t rxaddr, uint8_t channel, char* packetPtr);
-int sendDirectedPacket(uint8_t addr, uint8_t channel, char* msg) ;
-
 
 #endif /* __NRF_RADIO_H */
 /** @} */

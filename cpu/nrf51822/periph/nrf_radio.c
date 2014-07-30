@@ -69,6 +69,7 @@ int nrf_radio_init(void)
     /* define TX and RX address */
     NRF_RADIO->TXADDRESS = 0;               /* 1 := BASE0[1] + BASE0[0] + PREFIX0.AP0 */
     NRF_RADIO->RXADDRESSES = (1 << 4);      /* 1 := BASE1[1] + BASE1[0] + PREFIX1.AP4 */
+    NRF_RADIO->DACNF = (1 << 4);
 
     return 0;
 }
@@ -94,6 +95,7 @@ int nrf_radio_send(uint8_t addr, char *data, int size)
 
     /* put radio into transmit mode */
     DEBUG("radio: TXEN\n");
+    NRF_RADIO->EVENTS_READY = 0;
     NRF_RADIO->TASKS_TXEN = 1;
     /* wait until radio is in TXIDLE state */
     while (NRF_RADIO->EVENTS_READY == 0);
@@ -101,6 +103,7 @@ int nrf_radio_send(uint8_t addr, char *data, int size)
 
     /* start packet transmission */
     DEBUG("radio: START\n");
+    NRF_RADIO->EVENTS_END = 0;
     NRF_RADIO->TASKS_START = 1;
     /* wait until transmission is done */
     while (NRF_RADIO->EVENTS_END == 0);
@@ -108,6 +111,7 @@ int nrf_radio_send(uint8_t addr, char *data, int size)
 
     /* return to DISABLED state */
     DEBUG("radio: DISABLE\n");
+    NRF_RADIO->EVENTS_DISABLED = 0;
     NRF_RADIO->TASKS_DISABLE = 1;
     /* wait until radio was disabled */
     while (NRF_RADIO->EVENTS_DISABLED == 0);
@@ -133,27 +137,37 @@ int nrf_radio_receive(uint8_t addr, char *data, int maxsize)
 
     /* put radio into receiver mode */
     DEBUG("radio: RXEN\n");
+    NRF_RADIO->EVENTS_READY = 0;
     NRF_RADIO->TASKS_RXEN = 1;
     /* wait until radio is in RXIDLE state */
-    while (NRF_RADIO->EVENTS_READY == 0);
+    while (NRF_RADIO->EVENTS_READY != 1);
     NRF_RADIO->EVENTS_READY = 0;
+
+    uint32_t rxadd = NRF_RADIO->RXADDRESSES;
+    printf("active rx addresses: 0x%08x\n", (int)rxadd);
 
     /* start actual listening for packets */
     DEBUG("radio: RX\n");
+    NRF_RADIO->EVENTS_END = 0;
     NRF_RADIO->TASKS_START = 1;
     /* wait until a packet with valid preamble was received */
-    while (NRF_RADIO->EVENTS_END == 0);
+    while (NRF_RADIO->EVENTS_END != 1);
     NRF_RADIO->EVENTS_END = 0;
     DEBUG("radio: HAPPY HAPPY, a packet was received!\n");
 
     /* turn of the receiving mode */
     DEBUG("radio: DISABLE\n");
+    NRF_RADIO->EVENTS_DISABLED = 0;
     NRF_RADIO->TASKS_DISABLE = 1;
     /* wait until radio is in DISABLED state again */
-    while (NRF_RADIO->EVENTS_DISABLED == 0);
+    while (NRF_RADIO->EVENTS_DISABLED != 1);
     NRF_RADIO->EVENTS_DISABLED = 0;
 
     DEBUG("radio: RX-DONE\n");
+
+    uint32_t rxmatch = NRF_RADIO->RXMATCH;
+    printf("radio: RXMATCH 0x%08x\n", (int)rxmatch);
+
     return (int)data[0];
 }
 
