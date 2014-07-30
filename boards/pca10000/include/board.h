@@ -46,30 +46,18 @@
 /** @} */
 
 /**
- * @name Provice specific pin numbers
- * @{
- */
-#define RX_PIN_NUMBER  11
-#define TX_PIN_NUMBER  9
-#define CTS_PIN_NUMBER 10
-#define RTS_PIN_NUMBER 8
-/** @} */
-
-#define HWFC           true
-
-/**
  * @name Macros for controlling the on-board LEDs.
  * @{
  */
-#define LED_RED_ON          GPIO_DEV->OUTCLR = LED_RED_PIN
-#define LED_RED_OFF         GPIO_DEV->OUTSET = LED_RED_PIN
-#define LED_RED_TOGGLE      GPIO_DEV->OUT ^= LED_RED_PIN
-#define LED_GREEN_ON        GPIO_DEV->OUTCLR = LED_GREEN_PIN
-#define LED_GREEN_OFF       GPIO_DEV->OUTSET = LED_GREEN_PIN
-#define LED_GREEN_TOGGLE    GPIO_DEV->OUT ^= LED_GREEN_PIN
-#define LED_BLUE_ON         GPIO_DEV->OUTCLR = LED_BLUE_PIN
-#define LED_BLUE_OFF        GPIO_DEV->OUTSET = LED_BLUE_PIN
-#define LED_BLUE_TOGGLE     GPIO_DEV->OUT ^= LED_BLUE_PIN
+#define LED_RED_ON          (NRF_GPIO->OUTCLR = LED_RED_PIN)
+#define LED_RED_OFF         (NRF_GPIO->OUTSET = LED_RED_PIN)
+#define LED_RED_TOGGLE      NRF_GPIO->OUT ^= LED_RED_PIN
+#define LED_GREEN_ON        NRF_GPIO->OUTCLR = LED_GREEN_PIN
+#define LED_GREEN_OFF       NRF_GPIO->OUTSET = LED_GREEN_PIN
+#define LED_GREEN_TOGGLE    NRF_GPIO->OUT ^= LED_GREEN_PIN
+#define LED_BLUE_ON         NRF_GPIO->OUTCLR = LED_BLUE_PIN
+#define LED_BLUE_OFF        NRF_GPIO->OUTSET = LED_BLUE_PIN
+#define LED_BLUE_TOGGLE     NRF_GPIO->OUT ^= LED_BLUE_PIN
 
 
 /**
