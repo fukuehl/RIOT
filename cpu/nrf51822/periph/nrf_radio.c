@@ -57,12 +57,27 @@ int nrf_radio_init(void)
 
     /* packet length configuration */
     NRF_RADIO->PCNF0 = 8;           /* set length field to 8 bit -> 1 byte, S0 and S1 to 0 bit */
+    uint32_t pcnf0 = NRF_RADIO->PCNF0;
+    printf("active pcnf0: 0x%08x\n", (int)pcnf0);
+
     NRF_RADIO->PCNF1 |= NRF_RADIO_MAX_PACKET_SIZE;
 
     /* address configuration: base address configuration */
     NRF_RADIO->PCNF1 |= (NRF_RADIO_DEFAULT_BASEADDR_LENGTH << 16);
+    uint32_t pcnf1 = NRF_RADIO->PCNF1;
+    printf("active pcnf1: 0x%08x\n", (int)pcnf1);
+
     NRF_RADIO->BASE0 = NRF_RADIO_DEFAULT_BASEADDR;
+    //NRF_RADIO->BASE0 = 0xE7E7E7E7UL;  // Base address for prefix 0
     NRF_RADIO->BASE1 = NRF_RADIO_DEFAULT_BASEADDR;
+    //NRF_RADIO->BASE1 = 0x00C2C2C2UL;  // Base address for prefix 1-7
+
+    uint32_t base0 = NRF_RADIO->BASE0;
+    printf("active base0: 0x%08x\n", (int)base0);
+
+    uint32_t base1 = NRF_RADIO->BASE1;
+    printf("active base1: 0x%08x\n", (int)base1);
+
     /* address configuration: prefix configuration */
     // NRF_RADIO->PREFIX0 = NRF_RADIO_DEFAULT_PREFIX;
     // NRF_RADIO->PREFIX1 = NRF_RADIO_DEFAULT_PREFIX;
@@ -70,6 +85,29 @@ int nrf_radio_init(void)
     NRF_RADIO->TXADDRESS = 0;               /* 1 := BASE0[1] + BASE0[0] + PREFIX0.AP0 */
     NRF_RADIO->RXADDRESSES = (1 << 4);      /* 1 := BASE1[1] + BASE1[0] + PREFIX1.AP4 */
     NRF_RADIO->DACNF = (1 << 4);
+
+
+//    NRF_RADIO->CRCCNF = (RADIO_CRCCNF_LEN_Two << RADIO_CRCCNF_LEN_Pos); // Number of checksum bits
+//     if ((NRF_RADIO->CRCCNF & RADIO_CRCCNF_LEN_Msk)
+//         == (RADIO_CRCCNF_LEN_Two << RADIO_CRCCNF_LEN_Pos)) {
+//       NRF_RADIO->CRCINIT = 0xFFFFUL;      // Initial value
+//       NRF_RADIO->CRCPOLY = 0x11021UL;     // CRC poly: x^16+x^12^x^5+1
+//     } else if ((NRF_RADIO->CRCCNF & RADIO_CRCCNF_LEN_Msk)
+//         == (RADIO_CRCCNF_LEN_One << RADIO_CRCCNF_LEN_Pos)) {
+//       NRF_RADIO->CRCINIT = 0xFFUL;        // Initial value
+//       NRF_RADIO->CRCPOLY = 0x107UL;       // CRC poly: x^8+x^2^x^1+1
+//     }
+//     uint32_t crcnf = NRF_RADIO->CRCCNF;
+//     printf("active crcnf: 0x%08x\n", (int)crcnf);
+//     uint32_t crcinit = NRF_RADIO->CRCINIT;
+//     printf("active crcinit: 0x%08x\n", (int)crcinit);
+//     uint32_t crcpoly = NRF_RADIO->CRCPOLY;
+//     printf("active crcpoly: 0x%08x\n", (int)crcpoly);
+
+    NRF_RADIO->PREFIX0 &= ~(0xff);
+    NRF_RADIO->PREFIX0 |= 0x80;
+    NRF_RADIO->PREFIX1 &= ~(0xff);
+    NRF_RADIO->PREFIX1 |= 0x80;
 
     return 0;
 }
@@ -90,8 +128,11 @@ int nrf_radio_send(uint8_t addr, char *data, int size)
     NRF_RADIO->PACKETPTR = (uint32_t)nrf_radio_buf;
 
     /* set the TX address */
-    NRF_RADIO->PREFIX0 &= ~(0xff);
-    NRF_RADIO->PREFIX0 |= addr;
+//    NRF_RADIO->PREFIX0 &= ~(0xff);
+//    NRF_RADIO->PREFIX0 |= addr;
+
+    uint32_t prefix0 = NRF_RADIO->PREFIX0;
+    printf("radio: PREFIX0 0x%08x\n", (int)prefix0);
 
     /* put radio into transmit mode */
     DEBUG("radio: TXEN\n");
@@ -132,8 +173,11 @@ int nrf_radio_receive(uint8_t addr, char *data, int maxsize)
     NRF_RADIO->PACKETPTR = (uint32_t)data;
 
     /* set RX address */
-    NRF_RADIO->PREFIX1 &= ~(0xff);
-    NRF_RADIO->PREFIX1 |= addr;
+//    NRF_RADIO->PREFIX1 &= ~(0xff);
+//    NRF_RADIO->PREFIX1 |= addr;
+
+    uint32_t prefix1 = NRF_RADIO->PREFIX1;
+    printf("radio: PREFIX1 0x%08x\n", (int)prefix1);
 
     /* put radio into receiver mode */
     DEBUG("radio: RXEN\n");
@@ -168,7 +212,15 @@ int nrf_radio_receive(uint8_t addr, char *data, int maxsize)
     uint32_t rxmatch = NRF_RADIO->RXMATCH;
     printf("radio: RXMATCH 0x%08x\n", (int)rxmatch);
 
-    return (int)data[0];
+//    uint32_t crcstatus = NRF_RADIO->CRCSTATUS;
+//    printf("radio: CRCSTATUS 0x%08x\n", (int)crcstatus);
+
+//    if(NRF_RADIO->CRCSTATUS){
+    	return (int)data[0];
+//    } else {
+//    	return 0;
+//    }
+
 }
 
 void nrf_radio_set_mode(nrf_radio_mode_t mode)
