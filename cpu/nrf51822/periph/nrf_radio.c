@@ -29,10 +29,6 @@
 #define ENABLE_DEBUG    (1)
 #include "debug.h"
 
-
-static char nrf_radio_buf[NRF_RADIO_BUFSIZE];
-
-
 #define PREPARE_TX(x) do \
     { \
         NRF_RADIO->SHORTS = RADIO_SHORTS_READY_START_Enabled << RADIO_SHORTS_READY_START_Pos | \
@@ -53,6 +49,7 @@ static char nrf_radio_buf[NRF_RADIO_BUFSIZE];
             RADIO_SHORTS_END_DISABLE_Enabled << RADIO_SHORTS_END_DISABLE_Pos; \
     } while(0)
 
+static char nrf_radio_buf[NRF_RADIO_BUFSIZE];
 
 
 static uint32_t swap_bits(uint32_t inp)
@@ -104,16 +101,17 @@ int nrf_radio_init(void)
 
     /* packet length configuration */
     NRF_RADIO->PCNF0 = 8;           /* set length field to 8 bit -> 1 byte, S0 and S1 to 0 bit */
-    //NRF_RADIO->PCNF0 |= (RADIO_PCNF0_LFLEN_Msk | RADIO_PCNF0_S0LEN_Msk | RADIO_PCNF0_S1LEN_Msk);
     uint32_t pcnf0 = NRF_RADIO->PCNF0;
     printf("active pcnf0: 0x%08x\n", (int)pcnf0);
 
     NRF_RADIO->PCNF1 |= NRF_RADIO_MAX_PACKET_SIZE;
 
     /* address configuration: base address configuration */
-    NRF_RADIO->PCNF1 |= (NRF_RADIO_DEFAULT_BASEADDR_LENGTH << 16);
+    //NRF_RADIO->PCNF1 |= (NRF_RADIO_DEFAULT_BASEADDR_LENGTH << 16);
 
-    NRF_RADIO->PCNF1 = (RADIO_PCNF1_WHITEEN_Disabled << RADIO_PCNF1_WHITEEN_Pos) | (RADIO_PCNF1_ENDIAN_Big << RADIO_PCNF1_ENDIAN_Pos) | (NRF_RADIO_DEFAULT_BASEADDR_LENGTH << RADIO_PCNF1_BALEN_Pos) | (0 << RADIO_PCNF1_STATLEN_Pos) | (NRF_RADIO_MAX_PACKET_SIZE << RADIO_PCNF1_MAXLEN_Pos);
+    NRF_RADIO->PCNF1 =  (RADIO_PCNF1_ENDIAN_Big << RADIO_PCNF1_ENDIAN_Pos);
+	NRF_RADIO->PCNF1 |= (NRF_RADIO_DEFAULT_BASEADDR_LENGTH << RADIO_PCNF1_BALEN_Pos);
+	NRF_RADIO->PCNF1 |= (NRF_RADIO_MAX_PACKET_SIZE << RADIO_PCNF1_MAXLEN_Pos);
 
     uint32_t pcnf1 = NRF_RADIO->PCNF1;
     printf("active pcnf1: 0x%08x\n", (int)pcnf1);
@@ -133,42 +131,14 @@ int nrf_radio_init(void)
     printf("active base1: 0x%08x\n", (int)base1);
 
     /* address configuration: prefix configuration */
-    // NRF_RADIO->PREFIX0 = NRF_RADIO_DEFAULT_PREFIX;
-    // NRF_RADIO->PREFIX1 = NRF_RADIO_DEFAULT_PREFIX;
+//     NRF_RADIO->PREFIX0 = NRF_RADIO_DEFAULT_PREFIX;
+//     NRF_RADIO->PREFIX1 = NRF_RADIO_DEFAULT_PREFIX;
     /* define TX and RX address */
     NRF_RADIO->TXADDRESS = 0;               /* 1 := BASE0[1] + BASE0[0] + PREFIX0.AP0 */
     NRF_RADIO->RXADDRESSES = (1 << 4);      /* 1 := BASE1[1] + BASE1[0] + PREFIX1.AP4 */
     NRF_RADIO->DACNF = (1 << 4);
 
-
-//    NRF_RADIO->CRCCNF = (RADIO_CRCCNF_LEN_Two << RADIO_CRCCNF_LEN_Pos); // Number of checksum bits
-//     if ((NRF_RADIO->CRCCNF & RADIO_CRCCNF_LEN_Msk)
-//         == (RADIO_CRCCNF_LEN_Two << RADIO_CRCCNF_LEN_Pos)) {
-//       NRF_RADIO->CRCINIT = 0xFFFFUL;      // Initial value
-//       NRF_RADIO->CRCPOLY = 0x11021UL;     // CRC poly: x^16+x^12^x^5+1
-//     } else if ((NRF_RADIO->CRCCNF & RADIO_CRCCNF_LEN_Msk)
-//         == (RADIO_CRCCNF_LEN_One << RADIO_CRCCNF_LEN_Pos)) {
-//       NRF_RADIO->CRCINIT = 0xFFUL;        // Initial value
-//       NRF_RADIO->CRCPOLY = 0x107UL;       // CRC poly: x^8+x^2^x^1+1
-//     }
-//     uint32_t crcnf = NRF_RADIO->CRCCNF;
-//     printf("active crcnf: 0x%08x\n", (int)crcnf);
-//     uint32_t crcinit = NRF_RADIO->CRCINIT;
-//     printf("active crcinit: 0x%08x\n", (int)crcinit);
-//     uint32_t crcpoly = NRF_RADIO->CRCPOLY;
-//     printf("active crcpoly: 0x%08x\n", (int)crcpoly);
-
-//    NRF_RADIO->BASE0 = 0xE7E7E7E7;
-//     NRF_RADIO->PREFIX0 = 0xE7E7E7E7;
-//
-//     NRF_RADIO->PCNF0 = 8 << RADIO_PCNF0_LFLEN_Pos |
-//         8 << RADIO_PCNF0_S1LEN_Pos;
-//     NRF_RADIO->PCNF1 = 64 << RADIO_PCNF1_MAXLEN_Pos |
-//         4 << RADIO_PCNF1_BALEN_Pos;
-//
-//     NRF_RADIO->FREQUENCY = 40;
      NRF_RADIO->TIFS = 150;
-//     NRF_RADIO->MODE = RADIO_MODE_MODE_Ble_1Mbit << RADIO_MODE_MODE_Pos;
 
      NRF_RADIO->RXADDRESSES = 1;
 
@@ -280,14 +250,7 @@ int nrf_radio_receive(uint8_t addr, char *data, int maxsize)
     uint32_t rxmatch = NRF_RADIO->RXMATCH;
     printf("radio: RXMATCH 0x%08x\n", (int)rxmatch);
 
-//    uint32_t crcstatus = NRF_RADIO->CRCSTATUS;
-//    printf("radio: CRCSTATUS 0x%08x\n", (int)crcstatus);
-
-//    if(NRF_RADIO->CRCSTATUS){
-    	return (int)data[0];
-//    } else {
-//    	return 0;
-//    }
+    return (int)data[0];
 
 }
 
