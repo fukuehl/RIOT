@@ -33,6 +33,53 @@
 static char nrf_radio_buf[NRF_RADIO_BUFSIZE];
 
 
+#define PREPARE_TX(x) do \
+    { \
+        NRF_RADIO->SHORTS = RADIO_SHORTS_READY_START_Enabled << RADIO_SHORTS_READY_START_Pos | \
+            RADIO_SHORTS_END_DISABLE_Enabled << RADIO_SHORTS_END_DISABLE_Pos | \
+            RADIO_SHORTS_DISABLED_TXEN_Enabled << RADIO_SHORTS_DISABLED_TXEN_Pos; \
+    } while(0)
+
+#define PREPARE_RX(x) do \
+    { \
+        NRF_RADIO->SHORTS = RADIO_SHORTS_READY_START_Enabled << RADIO_SHORTS_READY_START_Pos | \
+            RADIO_SHORTS_END_DISABLE_Enabled << RADIO_SHORTS_END_DISABLE_Pos | \
+            RADIO_SHORTS_DISABLED_RXEN_Enabled << RADIO_SHORTS_DISABLED_RXEN_Pos; \
+    } while(0)
+
+#define PREPARE_DISABLE(x) do \
+    { \
+        NRF_RADIO->SHORTS = RADIO_SHORTS_READY_START_Enabled << RADIO_SHORTS_READY_START_Pos | \
+            RADIO_SHORTS_END_DISABLE_Enabled << RADIO_SHORTS_END_DISABLE_Pos; \
+    } while(0)
+
+
+
+static uint32_t swap_bits(uint32_t inp)
+{
+    uint32_t i;
+    uint32_t retval = 0;
+
+    inp = (inp & 0x000000FFUL);
+
+    for(i = 0; i < 8; i++)
+    {
+        retval |= ((inp >> i) & 0x01) << (7 - i);
+    }
+
+    return retval;
+}
+
+
+static uint32_t bytewise_bitswap(uint32_t inp)
+{
+      return (swap_bits(inp >> 24) << 24)
+           | (swap_bits(inp >> 16) << 16)
+           | (swap_bits(inp >> 8) << 8)
+           | (swap_bits(inp));
+}
+
+
 int nrf_radio_init(void)
 {
     /* power on the radio peripheral device */
@@ -57,6 +104,7 @@ int nrf_radio_init(void)
 
     /* packet length configuration */
     NRF_RADIO->PCNF0 = 8;           /* set length field to 8 bit -> 1 byte, S0 and S1 to 0 bit */
+    //NRF_RADIO->PCNF0 |= (RADIO_PCNF0_LFLEN_Msk | RADIO_PCNF0_S0LEN_Msk | RADIO_PCNF0_S1LEN_Msk);
     uint32_t pcnf0 = NRF_RADIO->PCNF0;
     printf("active pcnf0: 0x%08x\n", (int)pcnf0);
 
@@ -64,11 +112,17 @@ int nrf_radio_init(void)
 
     /* address configuration: base address configuration */
     NRF_RADIO->PCNF1 |= (NRF_RADIO_DEFAULT_BASEADDR_LENGTH << 16);
+
+    NRF_RADIO->PCNF1 = (RADIO_PCNF1_WHITEEN_Disabled << RADIO_PCNF1_WHITEEN_Pos) | (RADIO_PCNF1_ENDIAN_Big << RADIO_PCNF1_ENDIAN_Pos) | (NRF_RADIO_DEFAULT_BASEADDR_LENGTH << RADIO_PCNF1_BALEN_Pos) | (0 << RADIO_PCNF1_STATLEN_Pos) | (NRF_RADIO_MAX_PACKET_SIZE << RADIO_PCNF1_MAXLEN_Pos);
+
     uint32_t pcnf1 = NRF_RADIO->PCNF1;
     printf("active pcnf1: 0x%08x\n", (int)pcnf1);
 
-    NRF_RADIO->BASE0 = NRF_RADIO_DEFAULT_BASEADDR;
+    //NRF_RADIO->BASE0 = NRF_RADIO_DEFAULT_BASEADDR;
     //NRF_RADIO->BASE0 = 0xE7E7E7E7UL;  // Base address for prefix 0
+    NRF_RADIO->BASE0 = bytewise_bitswap(0x7ee30000UL);
+    NRF_RADIO->PREFIX0= 0xe7UL;
+
     NRF_RADIO->BASE1 = NRF_RADIO_DEFAULT_BASEADDR;
     //NRF_RADIO->BASE1 = 0x00C2C2C2UL;  // Base address for prefix 1-7
 
@@ -104,10 +158,19 @@ int nrf_radio_init(void)
 //     uint32_t crcpoly = NRF_RADIO->CRCPOLY;
 //     printf("active crcpoly: 0x%08x\n", (int)crcpoly);
 
-    NRF_RADIO->PREFIX0 &= ~(0xff);
-    NRF_RADIO->PREFIX0 |= 0x80;
-    NRF_RADIO->PREFIX1 &= ~(0xff);
-    NRF_RADIO->PREFIX1 |= 0x80;
+//    NRF_RADIO->BASE0 = 0xE7E7E7E7;
+//     NRF_RADIO->PREFIX0 = 0xE7E7E7E7;
+//
+//     NRF_RADIO->PCNF0 = 8 << RADIO_PCNF0_LFLEN_Pos |
+//         8 << RADIO_PCNF0_S1LEN_Pos;
+//     NRF_RADIO->PCNF1 = 64 << RADIO_PCNF1_MAXLEN_Pos |
+//         4 << RADIO_PCNF1_BALEN_Pos;
+//
+//     NRF_RADIO->FREQUENCY = 40;
+     NRF_RADIO->TIFS = 150;
+//     NRF_RADIO->MODE = RADIO_MODE_MODE_Ble_1Mbit << RADIO_MODE_MODE_Pos;
+
+     NRF_RADIO->RXADDRESSES = 1;
 
     return 0;
 }
@@ -126,6 +189,9 @@ int nrf_radio_send(uint8_t addr, char *data, int size)
 
     /* point radio to the prepared packet */
     NRF_RADIO->PACKETPTR = (uint32_t)nrf_radio_buf;
+
+
+    PREPARE_TX();
 
     /* set the TX address */
 //    NRF_RADIO->PREFIX0 &= ~(0xff);
@@ -171,6 +237,8 @@ int nrf_radio_receive(uint8_t addr, char *data, int maxsize)
 
     /* point RADIO device to receiving data buffer */
     NRF_RADIO->PACKETPTR = (uint32_t)data;
+
+    PREPARE_RX();
 
     /* set RX address */
 //    NRF_RADIO->PREFIX1 &= ~(0xff);
