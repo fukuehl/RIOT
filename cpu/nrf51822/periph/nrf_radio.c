@@ -108,12 +108,12 @@ int nrf_radio_init(void)
     uint32_t pcnf1 = NRF_RADIO->PCNF1;
     DEBUG("active pcnf1: 0x%08x\n", (int)pcnf1);
 
-    //NRF_RADIO->BASE0 = NRF_RADIO_DEFAULT_BASEADDR;
     /* As you can find in the nRF51 Reference Manual at section 16.1.2, least significant byte is
      * sent first, and least significant bit also is sent first (little endian) when the compiler
      * use store the MSBit first for each byte. So there is a bit swap for each byte needed
      */
     NRF_RADIO->BASE0 = bytewise_bitswap(0x7ee30000UL);
+    /* NRF_RADIO->BASE0 = NRF_RADIO_DEFAULT_BASEADDR; */
     NRF_RADIO->PREFIX0= 0xe7UL;
 
     NRF_RADIO->BASE1 = NRF_RADIO_DEFAULT_BASEADDR;
@@ -126,8 +126,8 @@ int nrf_radio_init(void)
     DEBUG("active base1: 0x%08x\n", (int)base1);
 
     /* address configuration: prefix configuration */
-//     NRF_RADIO->PREFIX0 = NRF_RADIO_DEFAULT_PREFIX;
-//     NRF_RADIO->PREFIX1 = NRF_RADIO_DEFAULT_PREFIX;
+/*     NRF_RADIO->PREFIX0 = NRF_RADIO_DEFAULT_PREFIX;
+       NRF_RADIO->PREFIX1 = NRF_RADIO_DEFAULT_PREFIX; */
     /* define TX and RX address */
     NRF_RADIO->TXADDRESS = 0;               /* 1 := BASE0[1] + BASE0[0] + PREFIX0.AP0 */
     NRF_RADIO->RXADDRESSES = 1;
@@ -158,8 +158,8 @@ int nrf_radio_send(uint8_t addr, char *data, int size)
     PREPARE_TX();
 
     /* set the TX address */
-//    NRF_RADIO->PREFIX0 &= ~(0xff);
-//    NRF_RADIO->PREFIX0 |= addr;
+/*    NRF_RADIO->PREFIX0 &= ~(0xff);
+    NRF_RADIO->PREFIX0 |= addr; */
 
     uint32_t prefix0 = NRF_RADIO->PREFIX0;
     DEBUG("radio: PREFIX0 0x%08x\n", (int)prefix0);
@@ -205,8 +205,8 @@ int nrf_radio_receive(uint8_t addr, char *data, int maxsize)
     PREPARE_RX();
 
     /* set RX address */
-//    NRF_RADIO->PREFIX1 &= ~(0xff);
-//    NRF_RADIO->PREFIX1 |= addr;
+/*    NRF_RADIO->PREFIX1 &= ~(0xff);
+      NRF_RADIO->PREFIX1 |= addr; */
 
     uint32_t prefix1 = NRF_RADIO->PREFIX1;
     DEBUG("radio: PREFIX1 0x%08x\n", (int)prefix1);
