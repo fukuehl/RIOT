@@ -43,12 +43,6 @@
             RADIO_SHORTS_DISABLED_RXEN_Enabled << RADIO_SHORTS_DISABLED_RXEN_Pos; \
     } while(0)
 
-#define PREPARE_DISABLE(x) do \
-    { \
-        NRF_RADIO->SHORTS = RADIO_SHORTS_READY_START_Enabled << RADIO_SHORTS_READY_START_Pos | \
-            RADIO_SHORTS_END_DISABLE_Enabled << RADIO_SHORTS_END_DISABLE_Pos; \
-    } while(0)
-
 static char nrf_radio_buf[NRF_RADIO_BUFSIZE];
 
 
@@ -102,22 +96,23 @@ int nrf_radio_init(void)
     /* packet length configuration */
     NRF_RADIO->PCNF0 = 8;           /* set length field to 8 bit -> 1 byte, S0 and S1 to 0 bit */
     uint32_t pcnf0 = NRF_RADIO->PCNF0;
-    printf("active pcnf0: 0x%08x\n", (int)pcnf0);
+    DEBUG("active pcnf0: 0x%08x\n", (int)pcnf0);
 
-    NRF_RADIO->PCNF1 |= NRF_RADIO_MAX_PACKET_SIZE;
-
-    /* address configuration: base address configuration */
-    //NRF_RADIO->PCNF1 |= (NRF_RADIO_DEFAULT_BASEADDR_LENGTH << 16);
-
+    /* Enable Big Endian */
     NRF_RADIO->PCNF1 =  (RADIO_PCNF1_ENDIAN_Big << RADIO_PCNF1_ENDIAN_Pos);
+    /* address configuration: base address configuration */
 	NRF_RADIO->PCNF1 |= (NRF_RADIO_DEFAULT_BASEADDR_LENGTH << RADIO_PCNF1_BALEN_Pos);
-	NRF_RADIO->PCNF1 |= (NRF_RADIO_MAX_PACKET_SIZE << RADIO_PCNF1_MAXLEN_Pos);
+	/* Maximum length of packet payload configuration*/
+	NRF_RADIO->PCNF1 |= NRF_RADIO_MAX_PACKET_SIZE;
 
     uint32_t pcnf1 = NRF_RADIO->PCNF1;
-    printf("active pcnf1: 0x%08x\n", (int)pcnf1);
+    DEBUG("active pcnf1: 0x%08x\n", (int)pcnf1);
 
     //NRF_RADIO->BASE0 = NRF_RADIO_DEFAULT_BASEADDR;
-    //NRF_RADIO->BASE0 = 0xE7E7E7E7UL;  // Base address for prefix 0
+    /* As you can find in the nRF51 Reference Manual at section 16.1.2, least significant byte is
+     * sent first, and least significant bit also is sent first (little endian) when the compiler
+     * use store the MSBit first for each byte. So there is a bit swap for each byte needed
+     */
     NRF_RADIO->BASE0 = bytewise_bitswap(0x7ee30000UL);
     NRF_RADIO->PREFIX0= 0xe7UL;
 
@@ -125,23 +120,22 @@ int nrf_radio_init(void)
     //NRF_RADIO->BASE1 = 0x00C2C2C2UL;  // Base address for prefix 1-7
 
     uint32_t base0 = NRF_RADIO->BASE0;
-    printf("active base0: 0x%08x\n", (int)base0);
+    DEBUG("active base0: 0x%08x\n", (int)base0);
 
     uint32_t base1 = NRF_RADIO->BASE1;
-    printf("active base1: 0x%08x\n", (int)base1);
+    DEBUG("active base1: 0x%08x\n", (int)base1);
 
     /* address configuration: prefix configuration */
 //     NRF_RADIO->PREFIX0 = NRF_RADIO_DEFAULT_PREFIX;
 //     NRF_RADIO->PREFIX1 = NRF_RADIO_DEFAULT_PREFIX;
     /* define TX and RX address */
     NRF_RADIO->TXADDRESS = 0;               /* 1 := BASE0[1] + BASE0[0] + PREFIX0.AP0 */
-    NRF_RADIO->RXADDRESSES = (1 << 4);      /* 1 := BASE1[1] + BASE1[0] + PREFIX1.AP4 */
+    NRF_RADIO->RXADDRESSES = 1;
+    //NRF_RADIO->RXADDRESSES = (1 << 4);      /* 1 := BASE1[1] + BASE1[0] + PREFIX1.AP4 */
     NRF_RADIO->DACNF = (1 << 4);
 
-     NRF_RADIO->TIFS = 150;
-
-     NRF_RADIO->RXADDRESSES = 1;
-
+    /* Inter Frame Spacing in microseconds */
+    NRF_RADIO->TIFS = 150;
     return 0;
 }
 
@@ -168,7 +162,7 @@ int nrf_radio_send(uint8_t addr, char *data, int size)
 //    NRF_RADIO->PREFIX0 |= addr;
 
     uint32_t prefix0 = NRF_RADIO->PREFIX0;
-    printf("radio: PREFIX0 0x%08x\n", (int)prefix0);
+    DEBUG("radio: PREFIX0 0x%08x\n", (int)prefix0);
 
     /* put radio into transmit mode */
     DEBUG("radio: TXEN\n");
@@ -215,7 +209,7 @@ int nrf_radio_receive(uint8_t addr, char *data, int maxsize)
 //    NRF_RADIO->PREFIX1 |= addr;
 
     uint32_t prefix1 = NRF_RADIO->PREFIX1;
-    printf("radio: PREFIX1 0x%08x\n", (int)prefix1);
+    DEBUG("radio: PREFIX1 0x%08x\n", (int)prefix1);
 
     /* put radio into receiver mode */
     DEBUG("radio: RXEN\n");
@@ -226,7 +220,7 @@ int nrf_radio_receive(uint8_t addr, char *data, int maxsize)
     NRF_RADIO->EVENTS_READY = 0;
 
     uint32_t rxadd = NRF_RADIO->RXADDRESSES;
-    printf("active rx addresses: 0x%08x\n", (int)rxadd);
+    DEBUG("active rx addresses: 0x%08x\n", (int)rxadd);
 
     /* start actual listening for packets */
     DEBUG("radio: RX\n");
@@ -248,7 +242,7 @@ int nrf_radio_receive(uint8_t addr, char *data, int maxsize)
     DEBUG("radio: RX-DONE\n");
 
     uint32_t rxmatch = NRF_RADIO->RXMATCH;
-    printf("radio: RXMATCH 0x%08x\n", (int)rxmatch);
+    DEBUG("radio: RXMATCH 0x%08x\n", (int)rxmatch);
 
     return (int)data[0];
 
